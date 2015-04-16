@@ -1,4 +1,7 @@
-# Delevoryas_CSCI2270_FinalProject
+## G.S.S.
+Grocery Store System
 
-# test
-test
+# Functionality
+* Inventory Management
+* Accounting
+* Smart Advertisement
