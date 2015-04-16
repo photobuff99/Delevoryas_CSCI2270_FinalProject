@@ -1,7 +1,7 @@
-## G.S.S.
+# G.S.S.
 Grocery Store System
 
-# Functionality
+#### Functionality
 * Inventory Management
 * Accounting
-* Smart Advertisement
+* Smart Advertising
