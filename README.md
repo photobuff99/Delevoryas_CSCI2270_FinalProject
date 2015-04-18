@@ -1,9 +1,9 @@
 # Project Summary
-    This library provides code for a simple LAN message board server, along with sample client code for accessing and posting to the message board.
-    The message board consists of a number of different topics, each containing a series of user-submitted messages.
-    Users connecting to the server can request to see the current topics, retrieve messages from a topic, or submit a message to a topic.
-    The server stores the messageboard topics in flat files, while also keeping the last five messages of each topic in a hashtable.
-    Topics are updated using a queue, and when requested by the user, can be sorted by number of messages or by most recent post.
+This library provides code for a simple LAN message board server, along with sample client code for accessing and posting to the message board.
+The message board consists of a number of different topics, each containing a series of user-submitted messages.
+Users connecting to the server can request to see the current topics, retrieve messages from a topic, or submit a message to a topic.
+The server stores the messageboard topics in flat files, while also keeping the last five messages of each topic in a hashtable.
+Topics are updated using a queue, and when requested by the user, can be sorted by number of messages or by most recent post.
 
 # How to Run
     1. Download the project files to your favorite directory
