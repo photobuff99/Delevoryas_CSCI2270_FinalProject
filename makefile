@@ -1,6 +1,7 @@
-all: client server
+all: Client Server
 
-client: client.c
-	gcc -std=c89 client.c -o client
-server: server.c
-	gcc -std=c89 server.c -o server
+Client: Client.cc Utilities.cc
+	g++ Client.cc Utilities.cc -o Client
+
+Server: Server.cc Utilities.cc
+	g++ Server.cc Utilities.cc -o Server
