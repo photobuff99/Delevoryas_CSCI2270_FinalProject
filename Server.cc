@@ -101,10 +101,19 @@ void HandleClient(int clientfd)
     //SendMessage(clientfd, msg);
     string recvd = RecvMessage(clientfd, 256);
     cout << "server: received " << recvd << endl;
-    if (recvd == GET) {
-        WriteMessage(, recvd);
-        
+    Request req = ParseMessage(recvd);
+    if (req.type == "GET") {
+        ifstream in (req.resource_location);
+        if (in.is_open()) {
+            string resource;
+            while (resource += in.get());
+            in.close();
+            Response resp("200", "OK");
+            SendMessage(clientfd, resp.ToString());
+            SendMessage(clientfd, resource);
+        }
     }
+
 }
 
 void WriteMessage(string filename, string message)

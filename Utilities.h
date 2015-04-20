@@ -71,5 +71,15 @@ struct Request
         { return type+" "+resource_location+"\n"+user_id+"\n\n"; }
 };
 
+struct Response
+{
+    std::string status_code;
+    std::string description;
+    int resource_size;
+    Response(std::string sc, std::string ds, int rs) : status_code(sc), description(ds), resource_size(rs){}
+    inline std::string ToString()
+        { return status_code + " " + description + "\n" + to_string(resource_size) + "\n\n"; }
+}
+
             /* Hash Functions */
 long SimpleHash(std::string key, long table_size);
