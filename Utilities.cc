@@ -76,23 +76,17 @@ string RecvMessage(int sockfd, int max_size)
     return msg;
 }
 
-int ParseMessage(string message)
+Request ParseMessage(string message)
 {
-    int fs = message.find(" ");
-    int ss = message.find(" ",fs+1);
-    string type = message.substr(0,fs);
-    string resource = message.substr(fs+1,ss-fs);
-    if (resource == "/topics.txt")
-        return 1;
-    else return 0;
+    int n = message.find(" ");
+    int m = message.find("\n");
+    int p = message.find("\n\n");
+
+    cout << n << ' ' << m << ' ' << p << endl;
+    cout << message.substr(0, n) << endl;
+    cout << message.substr(n+1, m-n-1) << 'h' << endl;
+    cout << message.substr(m+1, p-m-1) << 'h' << endl;
+
+    return Request();
 }
 
-void RequestTopics(int sockfd, string user)
-{
-    string request;
-    //char CR = 13, LF = 10;
-    request += "GET /topics.txt HTTP/1.0\n";
-    request += user + '\n' + '\n';
-    if (SendMessage(sockfd, request) < request.length())
-        std::cerr << "Error in sending message" << endl;
-}

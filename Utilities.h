@@ -21,10 +21,16 @@ extern "C" {
 #define SERV_NODE "localhost"
 #define SERV_PORT "7700"
 
+#define GET "GET"
+#define POST "POST"
+
+struct Request;
+
             /* Socket Connection    */
 // Wrapper function to replace getaddrinfo() and socket()
 // Param: www.example.com/IP for client, NULL for server, Port num, v4/v6, TCP/UDP, 0
-int     Socket(const char *ip_addr, const char *port, int domain, int type, int protocol);
+int     Socket(const char *ip_addr, const char *port,
+               int domain, int type, int protocol);
 
 // Start listening on the given socket file descriptor
 int     Listen(int sockfd, int queue_size);
@@ -39,7 +45,7 @@ int SendMessage(int sockfd, std::string message);
 std::string RecvMessage(int sockfd, int max_size);
 
 // Parse message as HTTP Request, returning the formatted header to be used to execute command
-int ParseMessage(std::string message);
+Request ParseMessage(std::string message);
 
 /*
  * 1. = send topics to user
@@ -48,8 +54,19 @@ int ParseMessage(std::string message);
  */
 
 // Send Topic Request
-void RequestTopics(int sockfd, std::string user);
+//void RequestTopics(int sockfd, std::string user);
 
             /* String Parsing Functions */
 
-// Split line on delimiter, return vector of sections
+struct Request
+{
+    std::string type; // GET or POST for this project
+    std::string resource_location; // To GET, or to POST to
+    std::string user_id; // email, username, etc (optional)
+
+    Request(){};
+    Request(std::string t, std::string rl) : type(t), resource_location(rl){}
+    Request(std::string t, std::string rl, std::string id) : type(t), resource_location(rl), user_id(id){}
+    inline std::string ToString()
+        { return type+" "+resource_location+"\n"+user_id+"\n\n"; }
+};
