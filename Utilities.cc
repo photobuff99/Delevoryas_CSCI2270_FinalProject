@@ -90,3 +90,26 @@ Request ParseMessage(string message)
     return Request();
 }
 
+long SimpleHash(std::string key, long table_size)
+{
+    int intLength = key.length() / 4;
+    long sum = 0;
+
+    for (int j = 0; j < intLength; j++) {
+        std::string c = key.substr(j * 4, (j * 4) + 4).c_str();
+        long mult = 1;
+        for (int k = 0; k < c.length(); k++) {
+            sum += c[k] * mult;
+            mult *= 256;
+        }
+    }
+
+    std::string c = key.substr(intLength * 4).c_str();
+    long mult = 1;
+    for (int k = 0; k < c.length(); k++) {
+        sum += c[k] * mult;
+        mult *= 256;
+    }
+
+    return (std::abs(sum) % table_size);
+}

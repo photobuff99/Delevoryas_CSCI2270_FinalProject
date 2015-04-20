@@ -70,3 +70,6 @@ struct Request
     inline std::string ToString()
         { return type+" "+resource_location+"\n"+user_id+"\n\n"; }
 };
+
+            /* Hash Functions */
+long SimpleHash(std::string key, long table_size);
