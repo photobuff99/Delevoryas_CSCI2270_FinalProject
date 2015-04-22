@@ -1,34 +1,20 @@
-#include "Utilities.h"
 #include <iostream>
 #include <fstream>
+#include "Networking.h"
 
-using std::cout; using std::cin;
-using std::string; using std::cerr;
-using std::endl;
-
-void RequestMessage(int sockfd);
-void sendMessage(string message);
-string recvMessage();
+using std::cerr; using std::cout; using std::endl;
 
 int main()
 {
-    int sockfd;
+  int socket_fd;
+  struct sockaddr_storage server_addr;
+  socklen_t size = sizeof(server_addr);
 
-    sockfd = Socket("localhost", SERV_PORT, AF_UNSPEC, SOCK_STREAM, 0);
-    if (sockfd == -1) {
-        cerr << "Error on socket()" << endl;
-        exit(1);
-    }
-
-
-    RequestMessage(sockfd);
-    close(sockfd);
-    return 0;
-}
-
-void RequestMessage(int sockfd)
-{
-    string s = RecvMessage(sockfd, 256);
-    cout << "Received:\n" << s << endl;
-    SendMessage(sockfd, "Hello Server!");
+  if ((socket_fd = Socket("localhost", "9034", AF_INET, SOCK_STREAM, 0)) < 0)
+    cerr << "socket" << endl;
+  cout << socket_fd << endl;
+  std::string s = Recv(socket_fd, 2999);
+  if (s.length() < 2999) cerr << "recv" << endl;
+  std::cout << s.length() << std::endl;
+  std::cout << s << std::endl;
 }
