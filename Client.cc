@@ -18,6 +18,8 @@ extern "C"
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/un.h>
+#include <time.h>
+#include "Util.h"
 }
 
 using std::cin;
@@ -25,19 +27,21 @@ using std::cout;
 using std::endl;
 using std::string;
 
-
 #define PORTINT 9034
 #define PORTSTR "9034"
 #define FAMILY AF_UNSPEC
 #define TYPE SOCK_STREAM
 #define PROTOCOL 0
-#define BUFSIZE 256
 #define OUTGOING 1
 #define PASSIVE 0
 
 int Socket(const char *ip, const char *port, int family, int type, int protocol,
            int direction);
+int Connect(const char *ip, const char *port);
 void Shell();
+ssize_t GetTopic(int fd, struct Topic *topic);
+ssize_t Request(int fd, char type, struct Post *p, struct Topic *t);
+
 
 int main(int argc, char **argv)
 {
@@ -111,33 +115,10 @@ int Connect(const char *ip, const char *port)
   return sfd;
 }
 
-int SendMessage(int sfd, string message)
-{
-  int bytes;
-  char buffer[BUFSIZE];
-  strcpy(buffer, message.c_str());
-  bytes = send(sfd, buffer, sizeof buffer, 0);
-  return bytes;
-}
-
-string Update(int sfd, string currenttopic)
-{
-  int bytes;
-  if (currenttopic == "chatclient")
-    currenttopic = "all";
-  string request = "GET " + currenttopic;
-  char buffer[BUFSIZE];
-  memset(buffer, 0, sizeof buffer);
-  bytes = SendMessage(sfd, request); // TODO replace BUFSIZE
-    cout << "chatclient: " << bytes << '/' << BUFSIZE << " bytes sent\n";
-  bytes = recv(sfd, buffer, sizeof buffer, 0);
-    cout << "chatclient: " << bytes << '/' << BUFSIZE << " bytes received\n";
-  // If length of message is < 255, recv() will be successful
-  return string(buffer);
-}
-
 void Shell()
 {
+  const size_t BUFSIZE = sizeof(struct Request);
+  const size_t POSTSIZE = sizeof(struct Post);
   const int INTOPIC = 1;
   const string DEFAULT = "chatclient";
   int servfd = -1;
@@ -148,10 +129,16 @@ void Shell()
   int location = 0;
   bool running = true;
   bool connected = false;
+  char buffer[POSTSIZE];
+  char request_type;
+  struct Post post;
+  Topic current_topic;
   
+  // TODO use hashtable to implement command if/else structure
   while (running) {
     cout << currenttopic << ">";
     getline(cin,line);
+
     if (line == "connect to host") {
       cout << "chatclient: enter host ip>";
       getline(cin,ip);
@@ -160,31 +147,66 @@ void Shell()
       servfd = Connect(ip.c_str(), port.c_str());
       if (servfd != -1)
         connected = true;
+
     } else if (line == "ls") {
       // get topics
+      if (connected) {
+        bytes = Request(servfd, GETLISTTOPICS, NULL, NULL);
+        if (bytes < sizeof(struct Request)) {
+          cout << "chatclient: error, request failed\n";
+        } else {
+          memset(&buffer, 0, sizeof buffer);
+          bytes = readn(servfd, buffer, 20);      // TESTING SIZE
+          if (bytes < 20)
+            cout << "Error! not all bytes read\n";
+          else
+            cout << buffer << endl;       // TTSTSSD
+        }
+      } else {
+        cout << "chatclient: currently disconnected from host\n";
+      }
+
     } else if (line == "help") {
       // print commands
+
     } else if (line.substr(0,2) == "cd") {
-      // get topics appropriately
+      memset(&current_topic, 0, sizeof(current_topic));
+      bytes = Request(servfd, GETTOPIC, NULL, &current_topic);
+      if (bytes < sizeof(current_topic)) {
+        cout << "chatclient: error, requesting topics, request\n";
+      } else {
+        bytes = readn(servfd, &current_topic, sizeof(current_topic));
+        if (bytes < sizeof(current_topic)) {
+          cout << "chatclient: error, receiving topics\n";
+        } else {
+          cout << "Title: " << current_topic.title << endl;
+          cout << "Username: " << current_topic.username << endl;
+          cout << "Post Username: " << current_topic.posts[0].username << endl;
+        }
+        
+      }
+
     } else if (line == "exit" || line == "quit") {
       running = false;
+
+  /*
     } else if (line == "update" || line == "u") {
-      if (connected)
-        cout << Update(servfd,currenttopic);
-      else
-        cout << "chatclient: currently disconnected from host\n";
-    } else if (line == "send message") {
       if (connected) {
-        cout << "enter message>";
+        bytes = GetTopic(sfd, &current_topic);
+      } else {
+        cout << "chatclient: currently disconnected from host\n";
+      }
+  */
+
+    } else if (line == "post") {
+      if (connected) {
+        cout << "enter post>";
         getline(cin,line);
         // SEND MESSAGE
-        bytes = SendMessage(servfd,line);
-        if (bytes < line.length()+1)
-          cout << "error, " << bytes << "/" << line.length()+1 << " bytes sent\n";
-        else
-          cout << "message sent\n";
-      } else
+
+      } else // if not connected
         cout << "chatclient: currently disconnected from host\n";
+
     } else {
       cout << "chatclient: " << line << ": command not found\n";
     }
@@ -192,4 +214,32 @@ void Shell()
   
   if (connected)
     close(servfd);
+}
+
+ssize_t GetTopic(int fd, Topic *topic)
+{
+  int bytes;
+  //bytes = writen(
+  return 1;
+}
+
+ssize_t Request(int fd, char type, struct Post *p, struct Topic *t)
+{
+  ssize_t bytes;
+  struct Request request;
+  memset(&request, 0, sizeof(struct Request));
+  
+  if (type == GETLISTTOPICS) {
+    request.type = GETLISTTOPICS;
+  } else if (type == POSTINTOPIC) {
+    request.type = POSTINTOPIC;
+    memcpy( &(request.post), p, sizeof(struct Post));
+  } else if (type == GETTOPIC) {
+    request.type = GETTOPIC;
+    memcpy( &(request.topic), t, sizeof(struct Topic));
+  }
+
+  bytes = writen(fd, &request, sizeof(struct Request));
+  printf("%lu/%lu bytes written\n", bytes, sizeof(struct Request));
+  return bytes;
 }

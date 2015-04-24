@@ -1,5 +1,4 @@
 #include <iostream>
-#include <vector>
 
 extern "C"
 {
@@ -20,43 +19,41 @@ extern "C"
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/un.h>
+#include <time.h>
+#include "Util.h"
 }
 
 using std::cin;
 using std::cout;
 using std::endl;
 using std::string;
-using std::vector;
 
-#define BUFSIZE 256
 #define PORT "9034"
 #define FAMILY AF_UNSPEC
 #define PROTOCOL 0
 #define TYPE SOCK_STREAM
 #define BACKLOG 10
 
-vector<string> resources;
-
 int Socket(const char *ip, const char *port, int family, int type, int protocol);
-int Echo(int sfd, char *buffer);
-int HandleClient(int sfd, char *request, int size, vector<string> &resources);
+ssize_t Respond(int fd, struct Request *request);
+
+// Preface every message sent with the number of bytes in character form
 
 int main(int argc, char **argv)
 {
-resources.push_back("legos");
-resources.push_back("legos,");
-resources.push_back("legos, eglkjadf");
-resources.push_back("legosadslfkja");
-resources.push_back("legosadsfafd");
+  // System type sizes, buffer relies on this
+  const size_t BUFSIZE = sizeof(struct Request);
+  const size_t POSTSIZE = sizeof(struct Post);
+  const size_t NBYTES_SIZE_T = sizeof(size_t);
 
-
-  int listener, newfd, maxfd, nbytes;
+  int listener, newfd, maxfd, bytes; // file descriptors, 
   char buffer[BUFSIZE];
   char *message;
   fd_set master, readfds;
   struct sockaddr_storage cliaddr;
   socklen_t addrlen;
 
+  // Clear file descriptor sets
   FD_ZERO(&master);
   FD_ZERO(&readfds);
 
@@ -73,20 +70,26 @@ resources.push_back("legosadsfafd");
   FD_SET(listener, &master);
   maxfd = listener;
 
-  //vector<string> topics;
-
+  // Handles clients through multiplexing/multicasting (terminology?? idgaf!!)
   while (1) {
     // Copy set of all fds to readfds
     readfds = master;
 
+    // select() call alters readfds to only include file
+    // descriptors that have new information (connection
+    // change or a received message/connection request)
     if (select(maxfd+1, &readfds, NULL, NULL, NULL) == -1) {
       perror("select");
       continue;
     }
 
+    // Find out which file descriptors are in readfds,
+    // i.e. figure out which ones have new info
+    // If this confuses you, look up what a file
+    // descriptor is. (It's an integer)
     for (int i = 0; i <= maxfd; ++i) {
-      if (FD_ISSET(i, &readfds)) {
-        if (i == listener) {
+      if (FD_ISSET(i, &readfds)) { // File desc with new info
+        if (i == listener) { // if listener fd, info = connection
           addrlen = sizeof cliaddr;
           memset(&cliaddr, 0, sizeof cliaddr);
           newfd = accept(listener, (struct sockaddr *)&cliaddr, &addrlen);
@@ -97,21 +100,33 @@ resources.push_back("legosadsfafd");
             if (newfd > maxfd)
               maxfd = newfd;
           }
-        } else {
+        } else { // if not listener, call recv() to figure out what's up
           memset(buffer, 0, sizeof buffer);
-          nbytes = recv(i, buffer, sizeof buffer, 0);
-          if (nbytes == 0) {
+          //bytes = recv(i, buffer, sizeof buffer, 0); // Old, 256 byte buffer
+          bytes = readn(i, buffer, sizeof buffer); // Will get bytes up to BUFSIZE
+          if (bytes == 0) { // This happens when a client disconnects
             printf("Client on %d has disconnected\n", i);
             close(i);
             FD_CLR(i, &master);
-          } else if (nbytes == -1) {
-            perror("recv");
+          } else if (bytes == -1) { // Readn must have been interrupted!
+            perror("readn");
             close(i);
             FD_CLR(i, &master);
-          } else { // nbytes > 0
-            printf("Message {%s} received from client on %d\n", buffer, i);
-            HandleClient(i, buffer, sizeof buffer, resources);
-            //Echo(i, buffer);
+          } else { // bytes > 0, client sent some bytes, MUST BE IN TEXT FORM
+            // If client's message isn't a stream of characters, how can
+            // the server know what it's receiving? It would just be a stream
+            // of random, unreadable bytes, and last I checked it's impossible
+            // to parse bytes without a key. ASCII chars are always one byte,
+            // so it's easy to parse them, no matter if the sending or recving
+            // systems are different! However, you'll notice that I send
+            // back info in byte form: that's because I'm relying on
+            // the fact that we will both be the same version of linux
+            // running on virtual box, so data should be represented the
+            // same way. Also, the client will be expecting data based on the
+            // type of request it sends, so it know the key to parse the
+            // bytes.
+            //printf("Message {%s} received from client on %d\n", buffer, i);
+            Respond(i, (struct Request *) &buffer);
           }
         }
       }
@@ -172,54 +187,39 @@ int Socket(const char *ip, const char *port, int family, int type, int protocol)
   return sfd;
 }
 
-int Echo(int sfd, char *buffer)
+ssize_t Respond(int fd, struct Request *request)
 {
-  int bytes;
-  bytes = send(sfd, buffer, BUFSIZE, 0);
-  cout << bytes << '/' << BUFSIZE << " echoed\n";
+  ssize_t bytes;
+  char type;
+
+  type = request->type;
+  if (type == GETLISTTOPICS) {
+    printf("Processing request for list of topics...\n");
+    char listtopics[20] = " jjjjj uasdf;lkjad\n";
+    bytes = writen(fd, listtopics, sizeof(listtopics));
+    printf("done\n");
+
+  } else if (type == POSTINTOPIC) {
+    printf("Processing post request\n");
+    printf("Username: %s\nText: %s\n",
+           request->post.username, request->post.text);
+    printf("done\n");
+
+  } else if (type == GETTOPIC) {
+    printf("Processing request for topic...\n");
+    Topic test;
+    memset(&test, 0, sizeof(test));
+    char teststr[20] = "1234512345123451234"; // TODO STOP TESTING
+    memcpy(&(test.title), &teststr, 20);
+    memcpy(&(test.username), &teststr, 20);
+    memcpy(&(test.posts[0].username), &teststr, 20);
+    bytes = writen(fd, &test, sizeof(test));
+    printf("done\n");
+
+  } else {
+    printf("Error, could not process type of request\n");
+    return -1;
+  }
+
   return bytes;
-}
-
-int SendResource(int sfd, string resource, vector<string> &resources)
-{
-  int status = -1;
-  char buffer[BUFSIZE];
-  memset(buffer, 0, sizeof buffer);
-
-  if (resource == "all") {
-    for (int i = 0; i < resources.size(); ++i) {
-      strcat(buffer, resources[i].c_str());
-      strcat(buffer, "\n");
-    }
-    status = Echo(sfd, buffer);
-  } else {
-    buffer[0] = '4';
-    buffer[1] = '0';
-    buffer[2] = '4';
-    status = Echo(sfd, buffer);
-    if (status == -1)
-      return -1;
-    cout << "404\n";
-  }
-  return status;
-}
-
-int HandleClient(int sfd, char *request, int size, vector<string> &resources)
-{
-  int status;
-  if (request[size-1] != '\0') {
-    cout << "HandleClient: error, request is too large\n";
-    return -1;
-  }
-  string request_str(request);
-  if (request_str.substr(0,3) == "GET") {
-    status = SendResource(sfd, request_str.substr(4), resources);
-    if (status == -1) {
-      cout << "HandleClient: SendResource: error\n";
-    }
-    return status;
-  } else {
-    cout << "error, request not understood or command not found\n";
-    return -1;
-  }
 }
