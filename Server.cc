@@ -20,7 +20,7 @@ extern "C"
 #include <sys/wait.h>
 #include <sys/un.h>
 #include <time.h>
-#include "Util.h"
+#include "ChatUtil.h"
 }
 
 using std::cin;
@@ -38,6 +38,11 @@ ssize_t Respond(int fd, struct Request *request);
 
 int main(int argc, char **argv)
 {
+  if (argc < 2) {
+    printf("Requires port as argv[1]\n");
+    exit(1);
+  }
+
   // System type sizes, buffer relies on this
   const size_t BUFSIZE = sizeof(struct Request);
   const size_t POSTSIZE = sizeof(struct Post);
@@ -54,9 +59,7 @@ int main(int argc, char **argv)
   FD_ZERO(&master);
   FD_ZERO(&readfds);
 
-  // IPv4, stream, default protocol for stream (TCP)
-  //listener = Socket("localhost", PORT, FAMILY, TYPE, PROTOCOL);
-  listener = Socket(NULL, PORTSTR);
+  listener = Socket(NULL, argv[1]);
   if (listener == -1)
     perror("Socket");
   

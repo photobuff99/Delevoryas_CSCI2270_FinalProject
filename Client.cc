@@ -19,7 +19,7 @@ extern "C"
 #include <sys/wait.h>
 #include <sys/un.h>
 #include <time.h>
-#include "Util.h"
+#include "ChatUtil.h"
 }
 
 using std::cin;
@@ -30,7 +30,6 @@ using std::string;
 int Socket(const char *ip, const char *port);
 int Connect(const char *ip, const char *port);
 void Shell();
-ssize_t GetTopic(int fd, struct Topic *topic);
 ssize_t Request(int fd, char type, struct Post *p, struct Topic *t);
 
 int main(int argc, char **argv)
@@ -167,13 +166,6 @@ void Shell()
   }
   if (servfd != -1)
     close(servfd);
-}
-
-ssize_t GetTopic(int fd, Topic *topic)
-{
-  int bytes;
-  //bytes = writen(
-  return 1;
 }
 
 ssize_t Request(int fd, char type, struct Post *p, struct Topic *t)

@@ -1,10 +1,13 @@
 all: Client Server
 
-Client: Client.cc Util.o
-	g++ Client.cc Util.o -o client -g
+Client: Client.cc ChatUtil.o
+	g++ -std=c++11 Client.cc ChatUtil.o -o client -g
 
-Server: Server.cc Util.o
-	g++ Server.cc Util.o -o server -g
+Server: Server.cc ChatUtil.o
+	g++ -std=c++11 Server.cc ChatUtil.o -o server -g
 
-Util.o: Util.c
-	gcc Util.c -c -g
+ChatUtil.o: ChatUtil.c
+	gcc ChatUtil.c -c -g
+
+test: test.cc HashTable.cc
+	g++ -std=c++11 test.cc HashTable.cc
