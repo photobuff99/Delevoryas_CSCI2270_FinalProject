@@ -28,13 +28,10 @@ using std::cout;
 using std::endl;
 using std::string;
 
-#define PORT "3490"
-#define FAMILY AF_UNSPEC
-#define PROTOCOL 0
-#define TYPE SOCK_STREAM
+#define PORTSTR "6000"
 #define BACKLOG 10
 
-int Socket(const char *ip, const char *port, int family, int type, int protocol);
+int Socket(const char *ip, const char *port);
 ssize_t Respond(int fd, struct Request *request);
 
 // Preface every message sent with the number of bytes in character form
@@ -59,7 +56,7 @@ int main(int argc, char **argv)
 
   // IPv4, stream, default protocol for stream (TCP)
   //listener = Socket("localhost", PORT, FAMILY, TYPE, PROTOCOL);
-  listener = Socket(NULL, PORT, FAMILY, TYPE, PROTOCOL);
+  listener = Socket(NULL, PORTSTR);
   if (listener == -1)
     perror("Socket");
   
@@ -139,19 +136,15 @@ int main(int argc, char **argv)
   }
 }
 
-int Socket(const char *ip, const char *port, int family, int type, int protocol)
+int Socket(const char *ip, const char *port)
 {
   int sfd, n;
   struct addrinfo hints, *servinfo, *p;
   int yes=1;
 
   memset(&hints, 0, sizeof hints);
-  hints.ai_family = family;
-  hints.ai_socktype = type;
-  //if ( (strcmp(ip, "127.0.0.1") == 0) ||
-       //(strcmp(ip, "localhost") == 0) ||
-       //(ip == NULL))
-    //hints.ai_flags = AI_PASSIVE;
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE;
 
   if ((n = getaddrinfo(ip, port, &hints, &servinfo)) == -1) {

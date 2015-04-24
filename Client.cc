@@ -27,22 +27,11 @@ using std::cout;
 using std::endl;
 using std::string;
 
-#define PORTINT 9034
-#define PORT "3490"
-#define IP "192.168.1.4"
-#define FAMILY AF_UNSPEC
-#define TYPE SOCK_STREAM
-#define PROTOCOL 0
-#define OUTGOING 1
-#define PASSIVE 0
-
-int Socket(const char *ip, const char *port, int family, int type, int protocol,
-           int direction);
+int Socket(const char *ip, const char *port);
 int Connect(const char *ip, const char *port);
 void Shell();
 ssize_t GetTopic(int fd, struct Topic *topic);
 ssize_t Request(int fd, char type, struct Post *p, struct Topic *t);
-
 
 int main(int argc, char **argv)
 {
@@ -50,21 +39,18 @@ int main(int argc, char **argv)
   cout << "Goodbye!\n";
 }
 
-int Socket(const char *ip, const char *port, int family, int type, int protocol,
-           int direction)
+int Socket(const char *ip, const char *port)
 {
   int sfd, n;
   struct addrinfo hints, *servinfo, *p;
   int yes=1;
 
   memset(&hints, 0, sizeof hints);
-  hints.ai_family = family;
-  hints.ai_socktype = type;
-  //if (direction != OUTGOING)
-    //hints.ai_flags = AI_PASSIVE;
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
 
-  //if ((n = getaddrinfo(ip, port, &hints, &servinfo)) == -1) {
-  if ((n = getaddrinfo(IP, PORT, &hints, &servinfo)) == -1) {
+  //TODO FIX THIS
+  if ((n = getaddrinfo(ip, port, &hints, &servinfo)) == -1) {
     perror("getaddrinfo");
     return -1;
   }
@@ -74,46 +60,25 @@ int Socket(const char *ip, const char *port, int family, int type, int protocol,
       perror("socket");
       continue;
     }
-
-/*
-    if (direction != OUTGOING) {
-      if (setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-        perror("setsockopt");
-        return -1;
-      }
-      if (bind(sfd, p->ai_addr, p->ai_addrlen) == -1) {
-        close(sfd);
-        perror("bind");
-        continue;
-      }
+    if (connect(sfd, p->ai_addr, p->ai_addrlen) == -1) {
+      close(sfd);
+      perror("connect");
+      continue;
     }
-*/
-
-    //if (direction == OUTGOING) {
-      if (connect(sfd, p->ai_addr, p->ai_addrlen) == -1) {
-        close(sfd);
-        perror("connect");
-        continue;
-      }
-    //}
-    
     break;
   }
-
   if (p == NULL) {
     perror("getting socket");
     return -1;
   }
-
   freeaddrinfo(servinfo);
-
   return sfd;
 }
 
 int Connect(const char *ip, const char *port)
 {
   int sfd;
-  sfd = Socket(ip, port, FAMILY, TYPE, PROTOCOL, OUTGOING);
+  sfd = Socket(ip, port);
   if (sfd == -1)
     cout << "Error: attempt to connect to host failed\n";
   return sfd;
@@ -129,7 +94,8 @@ void Shell()
   int bytes;
   string currenttopic = DEFAULT;
   string line;
-  string ip, port;
+  char ip[32];
+  char port[5];
   int location = 0;
   bool running = true;
   bool connected = false;
@@ -143,15 +109,18 @@ void Shell()
     cout << currenttopic << ">";
     getline(cin,line);
 
-    if (line == "connect to host") {
+    if (line == "connect") {
+      memset(ip, 0, sizeof(ip));
+      memset(port, 0, sizeof(port));
       cout << "chatclient: enter host ip>";
-      getline(cin,ip);
+      getline(cin,line);
+      strcpy(ip, line.c_str());
       cout << "chatclient: enter port>";
-      getline(cin,port);
-      servfd = Connect(ip.c_str(), port.c_str());
+      getline(cin,line);
+      strcpy(port, line.c_str());
+      servfd = Connect(ip, port);
       if (servfd != -1)
         connected = true;
-
     } else if (line == "ls") {
       // get topics
       if (connected) {
@@ -169,54 +138,34 @@ void Shell()
       } else {
         cout << "chatclient: currently disconnected from host\n";
       }
-
     } else if (line == "help") {
       // print commands
-
     } else if (line.substr(0,2) == "cd") {
-      memset(&current_topic, 0, sizeof(current_topic));
-      bytes = Request(servfd, GETTOPIC, NULL, &current_topic);
-      if (bytes < sizeof(current_topic)) {
-        cout << "chatclient: error, requesting topics, request\n";
-      } else {
-        bytes = readn(servfd, &current_topic, sizeof(current_topic));
+      if (connected) {
+        memset(&current_topic, 0, sizeof(current_topic));
+        bytes = Request(servfd, GETTOPIC, NULL, &current_topic);
         if (bytes < sizeof(current_topic)) {
-          cout << "chatclient: error, receiving topics\n";
+          cout << "chatclient: error, requesting topics, request\n";
         } else {
-          cout << "Title: " << current_topic.title << endl;
-          cout << "Username: " << current_topic.username << endl;
-          cout << "Post Username: " << current_topic.posts[0].username << endl;
+          bytes = readn(servfd, &current_topic, sizeof(current_topic));
+          if (bytes < sizeof(current_topic)) {
+            cout << "chatclient: error, receiving topics\n";
+          } else {
+            cout << "Title: " << current_topic.title << endl;
+            cout << "Username: " << current_topic.username << endl;
+            cout << "Post Username: " << current_topic.posts[0].username << endl;
+          }
         }
-        
+      } else { // not connected
+        cout << "chatclient: current disconnected from host\n";
       }
-
     } else if (line == "exit" || line == "quit") {
       running = false;
-
-  /*
-    } else if (line == "update" || line == "u") {
-      if (connected) {
-        bytes = GetTopic(sfd, &current_topic);
-      } else {
-        cout << "chatclient: currently disconnected from host\n";
-      }
-  */
-
-    } else if (line == "post") {
-      if (connected) {
-        cout << "enter post>";
-        getline(cin,line);
-        // SEND MESSAGE
-
-      } else // if not connected
-        cout << "chatclient: currently disconnected from host\n";
-
     } else {
       cout << "chatclient: " << line << ": command not found\n";
     }
   }
-  
-  if (connected)
+  if (servfd != -1)
     close(servfd);
 }
 
