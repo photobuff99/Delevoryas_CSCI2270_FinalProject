@@ -148,10 +148,11 @@ int Socket(const char *ip, const char *port, int family, int type, int protocol)
   memset(&hints, 0, sizeof hints);
   hints.ai_family = family;
   hints.ai_socktype = type;
-  if ( (strcmp(ip, "127.0.0.1") == 0) ||
-       (strcmp(ip, "localhost") == 0) ||
-       (ip == NULL))
-    hints.ai_flags = AI_PASSIVE;
+  //if ( (strcmp(ip, "127.0.0.1") == 0) ||
+       //(strcmp(ip, "localhost") == 0) ||
+       //(ip == NULL))
+    //hints.ai_flags = AI_PASSIVE;
+  hints.ai_flags = AI_PASSIVE;
 
   if ((n = getaddrinfo(ip, port, &hints, &servinfo)) == -1) {
     perror("getaddrinfo");
