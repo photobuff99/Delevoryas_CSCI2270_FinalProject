@@ -29,7 +29,7 @@ using std::string;
 
 #define PORTINT 9034
 #define PORT "3490"
-#define IP "192.168.1.4"
+#define IP "192.168.1.3"
 #define FAMILY AF_UNSPEC
 #define TYPE SOCK_STREAM
 #define PROTOCOL 0
@@ -60,8 +60,8 @@ int Socket(const char *ip, const char *port, int family, int type, int protocol,
   memset(&hints, 0, sizeof hints);
   hints.ai_family = family;
   hints.ai_socktype = type;
-  if (direction != OUTGOING)
-    hints.ai_flags = AI_PASSIVE;
+  //if (direction != OUTGOING)
+    //hints.ai_flags = AI_PASSIVE;
 
   //if ((n = getaddrinfo(ip, port, &hints, &servinfo)) == -1) {
   if ((n = getaddrinfo(IP, PORT, &hints, &servinfo)) == -1) {
@@ -75,6 +75,7 @@ int Socket(const char *ip, const char *port, int family, int type, int protocol,
       continue;
     }
 
+/*
     if (direction != OUTGOING) {
       if (setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
         perror("setsockopt");
@@ -86,14 +87,15 @@ int Socket(const char *ip, const char *port, int family, int type, int protocol,
         continue;
       }
     }
+*/
 
-    if (direction == OUTGOING) {
+    //if (direction == OUTGOING) {
       if (connect(sfd, p->ai_addr, p->ai_addrlen) == -1) {
         close(sfd);
         perror("connect");
         continue;
       }
-    }
+    //}
     
     break;
   }
