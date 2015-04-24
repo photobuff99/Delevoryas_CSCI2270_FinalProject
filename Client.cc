@@ -28,7 +28,8 @@ using std::endl;
 using std::string;
 
 #define PORTINT 9034
-#define PORTSTR "9034"
+#define PORT "3490"
+#define IP "192.168.1.4"
 #define FAMILY AF_UNSPEC
 #define TYPE SOCK_STREAM
 #define PROTOCOL 0
@@ -62,7 +63,8 @@ int Socket(const char *ip, const char *port, int family, int type, int protocol,
   if (direction != OUTGOING)
     hints.ai_flags = AI_PASSIVE;
 
-  if ((n = getaddrinfo(ip, port, &hints, &servinfo)) == -1) {
+  //if ((n = getaddrinfo(ip, port, &hints, &servinfo)) == -1) {
+  if ((n = getaddrinfo(IP, PORT, &hints, &servinfo)) == -1) {
     perror("getaddrinfo");
     return -1;
   }

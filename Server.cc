@@ -28,7 +28,7 @@ using std::cout;
 using std::endl;
 using std::string;
 
-#define PORT "9034"
+#define PORT "3490"
 #define FAMILY AF_UNSPEC
 #define PROTOCOL 0
 #define TYPE SOCK_STREAM
@@ -58,7 +58,8 @@ int main(int argc, char **argv)
   FD_ZERO(&readfds);
 
   // IPv4, stream, default protocol for stream (TCP)
-  listener = Socket("localhost", PORT, FAMILY, TYPE, PROTOCOL);
+  //listener = Socket("localhost", PORT, FAMILY, TYPE, PROTOCOL);
+  listener = Socket(NULL, PORT, FAMILY, TYPE, PROTOCOL);
   if (listener == -1)
     perror("Socket");
   
