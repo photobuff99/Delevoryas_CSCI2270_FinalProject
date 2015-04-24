@@ -29,7 +29,7 @@ using std::string;
 
 #define PORTINT 9034
 #define PORT "3490"
-#define IP "192.168.1.3"
+#define IP "192.168.1.4"
 #define FAMILY AF_UNSPEC
 #define TYPE SOCK_STREAM
 #define PROTOCOL 0
