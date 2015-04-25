@@ -1,4 +1,5 @@
 #include <iostream>
+#include "Hash.h"
 extern "C"
 {
 #include <string.h>
@@ -99,6 +100,7 @@ void Shell()
   bool running = true;
   bool connected = false;
   char buffer[POSTSIZE];
+  char topicsbuffer[MAXTOPICS*TITLELENGTH];
   char request_type;
   struct Post post;
   Topic current_topic;
@@ -127,12 +129,17 @@ void Shell()
         if (bytes < sizeof(struct Request)) {
           cout << "chatclient: error, request failed\n";
         } else {
-          memset(&buffer, 0, sizeof buffer);
-          bytes = readn(servfd, buffer, 20);      // TESTING SIZE
-          if (bytes < 20)
+          //memset(&buffer, 0, sizeof buffer); // Modifying this, trying out the first
+          // version of attempting to send full list of topics
+          memset(&topicsbuffer, 0, sizeof topicsbuffer);
+          bytes = readn(servfd, topicsbuffer, sizeof topicsbuffer);      // TESTING SIZE
+          if (bytes < sizeof topicsbuffer)
             cout << "Error! not all bytes read\n";
           else
-            cout << buffer << endl;       // TTSTSSD
+            for (int i = 0; i < MAXTOPICS; ++i)
+              printf("%s\n",&topicsbuffer[i*TITLELENGTH]);
+              //cout << i+1 << ": " << buffer[i*TITLELENGTH] << '\n';
+            //cout << buffer << endl;       // TTSTSSD
         }
       } else {
         cout << "chatclient: currently disconnected from host\n";
@@ -151,8 +158,6 @@ void Shell()
             cout << "chatclient: error, receiving topics\n";
           } else {
             cout << "Title: " << current_topic.title << endl;
-            cout << "Username: " << current_topic.username << endl;
-            cout << "Post Username: " << current_topic.posts[0].username << endl;
           }
         }
       } else { // not connected

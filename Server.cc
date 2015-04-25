@@ -33,7 +33,9 @@ using std::string;
 #define BACKLOG 10
 
 int Socket(const char *ip, const char *port);
-ssize_t Respond(int fd, struct Request *request);
+//ssize_t Respond(int fd, struct Request *request);
+ssize_t Respond(int fd, struct Request *request, Hash &table);
+
 
 // Preface every message sent with the number of bytes in character form
 
@@ -129,7 +131,7 @@ int main(int argc, char **argv)
             // type of request it sends, so it know the key to parse the
             // bytes.
             //printf("Message {%s} received from client on %d\n", buffer, i);
-            Respond(i, (struct Request *) &buffer);
+            Respond(i, (struct Request *) &buffer, table);
           }
         }
       }
@@ -187,7 +189,7 @@ int Socket(const char *ip, const char *port)
   return sfd;
 }
 
-ssize_t Respond(int fd, struct Request *request)
+ssize_t Respond(int fd, struct Request *request, Hash &table)
 {
   ssize_t bytes;
   char type;
@@ -195,14 +197,21 @@ ssize_t Respond(int fd, struct Request *request)
   type = request->type;
   if (type == GETLISTTOPICS) {
     printf("Processing request for list of topics...\n");
-    char listtopics[20] = " jjjjj uasdf;lkjad\n";
+    //char listtopics[20] = " jjjjj uasdf;lkjad\n";
+    char listtopics[MAXTOPICS*TITLELENGTH];
+    table.gettopics(listtopics);
+    for (int i = 0; i < MAXTOPICS; ++i)
+      printf("%s\n", &listtopics[i*TITLELENGTH]);
     bytes = writen(fd, listtopics, sizeof(listtopics));
+    if (bytes < sizeof listtopics)
+      printf("server: error writing list of topics, %lu/%lu sent\n",
+             bytes, sizeof listtopics);
     printf("done\n");
 
   } else if (type == POSTINTOPIC) {
     printf("Processing post request\n");
-    printf("Username: %s\nText: %s\n",
-           request->post.username, request->post.text);
+    //printf("Username: %s\nText: %s\n",
+           //request->post.username, request->post.text);
     printf("done\n");
 
   } else if (type == GETTOPIC) {
@@ -211,8 +220,8 @@ ssize_t Respond(int fd, struct Request *request)
     memset(&test, 0, sizeof(test));
     char teststr[20] = "1234512345123451234"; // TODO STOP TESTING
     memcpy(&(test.title), &teststr, 20);
-    memcpy(&(test.username), &teststr, 20);
-    memcpy(&(test.posts[0].username), &teststr, 20);
+    //memcpy(&(test.username), &teststr, 20);
+    //memcpy(&(test.posts[0].username), &teststr, 20);
     bytes = writen(fd, &test, sizeof(test));
     printf("done\n");
 

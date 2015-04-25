@@ -12,7 +12,7 @@ extern "C"
 }
 
 #define TABLESIZE 3000
-#define MAXTOPICS 800 
+#define MAXTOPICS 1000 
 #define TITLELENGTH 20
 
 struct Node
