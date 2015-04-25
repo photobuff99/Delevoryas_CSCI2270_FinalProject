@@ -10,11 +10,11 @@ Server: Server.cc ChatUtil.o
 ChatUtil.o: ChatUtil.c
 	gcc ChatUtil.c -c -g
 
-test: test.cc HashTable.cc
-	g++ -std=c++11 test.cc HashTable.cc
+test: test.cc Hash.cc
+	g++ -std=c++11 test.cc Hash.cc -g -o test
 
-test1: test.cc HashTable.cc
-	g++ -std=c++11 test.cc HashTable.cc -o test
+test1: test.cc Hash.cc
+	g++ -std=c++11 test.cc Hash.cc -o test -g
 
-test2: test2.cc HashTable.cc
-	g++ -std=c++11 test2.cc HashTable.cc -o test2
+test2: test2.cc Hash.cc
+	g++ -std=c++11 test2.cc Hash.cc -o test2 -g

@@ -73,6 +73,8 @@ int Hash::insert(const Topic &topic)
   x = djb2(topic.title);
   if (table[x] == NULL) { // empty spot
     table[x] = new Node(topic);
+    table[x]->prev = NULL;
+    table[x]->next = NULL;
   } else { // a collision
     collisions++;
     n = table[x];
@@ -81,8 +83,11 @@ int Hash::insert(const Topic &topic)
         return -1;
       n = n->next;
     }
+    if (strcmp(topic.title,n->topic.title) == 0)
+      return -1;
     n->next = new Node(topic);
     n->next->prev = n;
+    n->next->next = NULL;
   }
   ntopics++;
   return 0;
@@ -95,7 +100,7 @@ int Hash::remove(const char *title)
   Node *n;
 
   // remove from table
-  x = HashIndex(title);
+  x = djb2(title);
   if (table[x] == NULL) { // not found!
     return -1;
   } else if (table[x]->next == NULL) { // no colsns
@@ -130,13 +135,14 @@ Topic *Hash::get(const char *title)
 {
   int x;
 
+  x = djb2(title);
   if (table[x] != NULL)
     return &(table[x]->topic);
   else
     return NULL;
 }
 
-int Hash::get_collisions()
+int Hash::getcollisions()
 {
   return collisions;
 }
@@ -181,7 +187,34 @@ int Hash::writetobfile()
   return 0;
 }
 
-int Hash::get_ntopics()
+int Hash::getntopics()
 {
   return ntopics;
+}
+
+void Hash::gettopics(char *buffer)
+{
+  Node **n, *m;
+  int bytes;
+  //char teststr[20] = "0000000000000000001"; // TESTING
+  int numtopics = 0;
+
+  //n = table;
+  bytes = 0;
+  //while (n++ != table+TABLESIZE) {// TESTING
+  for (int i = 0; i < TABLESIZE; ++i) {
+    m = table[i];
+    while (m != NULL) {
+      if (bytes >= MAXTOPICS*TITLELENGTH) break;
+      strncpy(&buffer[bytes],m->topic.title,TITLELENGTH);
+      //memcpy(&buffer[bytes],teststr,TITLELENGTH);               // TESTING
+      //printf("hash: copying %s to buffer...\n", m->topic.title);// TESTING
+      //printf("hash: copying %s to buffer...\n", teststr);       // TESTING
+      ++numtopics;
+      bytes += TITLELENGTH;
+      m = m->next;
+    }
+  }
+
+  printf("Found: %d, ntopics = %d\n", numtopics, ntopics);
 }

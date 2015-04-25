@@ -11,8 +11,8 @@ extern "C"
 #include "ChatUtil.h"
 }
 
-#define TABLESIZE 100
-#define MAXTOPICS 10 
+#define TABLESIZE 3000
+#define MAXTOPICS 800 
 #define TITLELENGTH 20
 
 struct Node
@@ -41,10 +41,11 @@ class Hash
   int insert(const Topic &topic);
   int remove(const char *title);
   Topic *get(const char *title);
-  int get_collisions();
+  int getcollisions();
   void print();
   int writetobfile();
-  int get_ntopics();
+  int getntopics();
+  void gettopics(char *buffer); // MUST BE MAXTOPICS*TITLELENGTH longs
 };
 
 #endif//PETERDELEVORYAS_HASH_H

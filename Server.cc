@@ -1,4 +1,5 @@
 #include <iostream>
+#include "Hash.h"
 
 extern "C"
 {
@@ -54,6 +55,7 @@ int main(int argc, char **argv)
   fd_set master, readfds;
   struct sockaddr_storage cliaddr;
   socklen_t addrlen;
+  Hash table;
 
   // Clear file descriptor sets
   FD_ZERO(&master);
