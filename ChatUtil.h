@@ -15,7 +15,6 @@ struct Post
 struct Topic
 {
   char title[20];
-  char username[20];
   struct Post posts[10];
 };
 
