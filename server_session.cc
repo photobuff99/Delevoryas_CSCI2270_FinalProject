@@ -1,6 +1,7 @@
+// PETER DELEVORYAS
 #include "server_session.h"
 #include "util.h"
-#include "util.cc"
+#include "util.cc"    // necessary for compilation
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -232,10 +233,4 @@ void server_session::return_topics(int fd)
   bytes = writen(fd, buffer, sizeof buffer);
   if (bytes < sizeof buffer)
     cerr << "server: error writing bytes, list of topics" << endl;
-}
-
-int main()
-{
-  server_session ssn("localhost", "3490");
-  ssn.init_chat();
 }

@@ -1,6 +1,7 @@
+// Peter Delevoryas
 #include "client_session.h"
 #include "util.h"
-#include "util.cc"
+#include "util.cc"      // this is necessary for compilation
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -82,7 +83,10 @@ void client_session::init_prompt()
   while (running) {
     cout << "chatclient>";
     getline(std::cin, command);
-    execute(command);
+    if (command != "exit")
+      execute(command);
+    else
+      break;
   }
 }
 
@@ -92,9 +96,20 @@ void client_session::execute(std::string command)
 
   if (command == "help") {
     cout << "Commands:" << endl;
-    cout << "\tls" << endl;
-    cout << "\tcd" << endl;
-    cout << "\tpost" << endl;
+    cout << "  ls: lists topics/messages" << endl;
+    cout << "  cd: changes current topic" << endl;
+    cout << "  post: you can post topics or messages" << endl;
+    cout << "  for more detailed help on any of these commands,\n"
+         << "  enter help __" << endl;
+  } else if (command == "help ls") {
+    cout << "  Enter ls while in a topic to view the last ten messages\n"
+         << "  Enter ls while outside of any topics to view the list of topics\n";
+  } else if (command == "help cd") {
+    cout << "  Enter only \"cd\" to leave any topic you are in.\n"
+         << "  Enter cd _____ to \"changes directories\" to a topic.\n";
+  } else if (command == "help post") {
+    cout << "  Enter \"post\" while in a topic to post a message.\n"
+         << "  enter \"post\" while outside any topics to make a new topic.\n";
   } else if (command == "ls") {
     if (current_topic == DEFAULT)
       get_topics();
@@ -123,6 +138,8 @@ void client_session::execute(std::string command)
       getline(std::cin, message);
       post_message(current_topic, name, message);
     }
+  } else if (command == "exit") {
+    connected = false;
   } else {
     cout << "chatclient: error, command not found" << endl;
   }
@@ -130,7 +147,6 @@ void client_session::execute(std::string command)
 
 void client_session::get_topics()
 {
-  //cout << "getting topics";
   char buffer[MAXTOPICS*TITLELEN];
   Request request;
   memset(&request, 0, sizeof request);
@@ -162,15 +178,15 @@ void client_session::get_messages(std::string topic)
   // sizeof() -1 because of null terminator at the end
   strncpy(request.topic.title,topic.c_str(),sizeof(request.topic.title)-1);
   send_request(&request);
-  cout << "getting messages for " << topic << endl;
+  //cout << "getting messages for " << topic << endl;
   memset(&request, 0, sizeof request);
   get_response(&request);
-  cout << "Topic Title: " << request.topic.title << endl;
+  cout << "Topic: " << request.topic.title << endl;
   for (int i = 0; i < MAXPOSTS; ++i) {
     if (request.topic.posts[i].text[0] != '\0') {
       ++numposts;
-      cout << "User: " << request.topic.posts[i].username
-           << "--> "   << request.topic.posts[i].text << endl;
+      cout << "Usr: " << request.topic.posts[i].username
+           << "--> "  << request.topic.posts[i].text << endl;
     }
   }
   if (numposts == 0)
@@ -213,11 +229,4 @@ void client_session::get_response(struct Request *buffer)
     return;
   }
   readn(fd, buffer, sizeof(struct Request));
-}
-
-int main()
-{
-  client_session csn;
-  csn.connect_to_server("localhost", "3490");
-  csn.init_prompt();
 }

@@ -1,10 +1,14 @@
 all: server client
 
-test: test.cc Hash.cc
-	g++ test.cc Hash.cc -o test
+client: client_driver.o client_session.o
+	g++ client_driver.o client_session.o
 
-server: server_session.cc Hash.cc
-	g++ server_session.cc Hash.cc -o server
+client_driver.o: client_driver.cc
+	g++ -c client_driver.cc
 
-client: client_session.cc
-	g++ client_session.cc -o client
+client:
+	g++ -c client_session.cc
+
+server: 
+	g++ server_driver.cc server_session.cc Hash.cc
+
