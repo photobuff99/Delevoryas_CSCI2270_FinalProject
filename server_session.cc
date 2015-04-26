@@ -109,13 +109,10 @@ void server_session::init_chat()
   while (1) {
     read_fds = all_fds; // copy file descriptors
 
-/*
     if (select(fd_max+1, &read_fds, NULL, NULL, NULL) == -1) {
       cerr << "server: error on select" << endl;
       continue;
     }
-*/
-    accept_connection();
 
     for (int i = 0; i <= fd_max; ++i) {
       // If a file desc has new input
