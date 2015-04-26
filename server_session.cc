@@ -42,8 +42,9 @@ server_session::server_session(std::string ip_addr_, std::string port_)
   // linked list of possible address
   // combinations to use when attempting
   // to construct a listening socket
-  if (getaddrinfo(ip_addr.c_str(), port.c_str(), &hints, &servinfo) == -1) {
-    cerr << "getaddrinfo" << endl;
+  //if (getaddrinfo(ip_addr.c_str(), port.c_str(), &hints, &servinfo) == -1) {
+  if (getaddrinfo("localhost", "3490", &hints, &servinfo) == -1) {
+    cerr << "server: getaddrinfo" << endl;
     valid = false; // indicate failure to create socket_stream
     return;
   }
@@ -56,24 +57,24 @@ server_session::server_session(std::string ip_addr_, std::string port_)
   // testing.
   for (p = servinfo; p != NULL; p = p->ai_next) {
     if ( (listening_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
-      cerr << "socket" << endl;
+      cerr << "server: socket" << endl;
       continue;
     }
     if (setsockopt(listening_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-      cerr << "setsockopt" << endl;
+      cerr << "server: setsockopt" << endl;
       valid = false;
       return;
     }
     if (bind(listening_fd, p->ai_addr, p->ai_addrlen) == -1) {
       close(listening_fd);
-      cerr << "bind" << endl;
+      cerr << "server :bind" << endl;
       continue;
     }
     break; // Success in binding socket!
   }
   // Couldn't allocate and bind a socket
   if (p == NULL) {
-    cerr << "allocating/binding socket" << endl;
+    cerr << "server: allocating/binding socket" << endl;
     valid = false;
     return;
   }
