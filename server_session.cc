@@ -42,8 +42,8 @@ server_session::server_session(std::string ip_addr_, std::string port_)
   // linked list of possible address
   // combinations to use when attempting
   // to construct a listening socket
-  //if (getaddrinfo(ip_addr.c_str(), port.c_str(), &hints, &servinfo) == -1) {
-  if (getaddrinfo("localhost", "3490", &hints, &servinfo) == -1) {
+  if (getaddrinfo(ip_addr.c_str(), port.c_str(), &hints, &servinfo) == -1) {
+  //if (getaddrinfo("localhost", "3490", &hints, &servinfo) == -1) {
     cerr << "server: getaddrinfo" << endl;
     valid = false; // indicate failure to create socket_stream
     return;
@@ -109,10 +109,13 @@ void server_session::init_chat()
   while (1) {
     read_fds = all_fds; // copy file descriptors
 
+/*
     if (select(fd_max+1, &read_fds, NULL, NULL, NULL) == -1) {
       cerr << "server: error on select" << endl;
       continue;
     }
+*/
+    accept_connection();
 
     for (int i = 0; i <= fd_max; ++i) {
       // If a file desc has new input
@@ -130,6 +133,8 @@ void server_session::init_chat()
 
 void server_session::accept_connection()
 {
+  std::cout << "DEBUGGING" << endl;
+
   int new_fd;
   struct sockaddr_storage cliaddr;
   socklen_t addrlen;

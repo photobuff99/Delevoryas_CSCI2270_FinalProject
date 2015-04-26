@@ -45,8 +45,8 @@ void client_session::connect_to_server(std::string server_addr_, std::string ser
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
-  //if (getaddrinfo(server_addr.c_str(), server_port.c_str(), &hints, &servinfo) == -1) {
-  if (getaddrinfo("192.168.1.3", "3490", &hints, &servinfo) == -1) {
+  if (getaddrinfo(server_addr_.c_str(), server_port_.c_str(), &hints, &servinfo) == -1) {
+  //if (getaddrinfo("192.168.1.4", "3490", &hints, &servinfo) == -1) {
     cerr << "chatclient: getaddrinfo" << endl;
     valid = false;
     return;
