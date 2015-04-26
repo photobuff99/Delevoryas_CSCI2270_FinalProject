@@ -161,12 +161,19 @@ void Hash::print()
 {
   Node *n;
 
-  for (int i = 0; i < TABLESIZE; ++i)
-    if ((n = table[i]) != NULL)
+  for (int i = 0; i < TABLESIZE; ++i) {
+    if ((n = table[i]) != NULL) {
       while (n != NULL) {
         printf("%d: %s\n", i, n->topic.title);
+        for (int j = 0; j < MAXPOSTS; ++j) {
+          printf("  %s> %s\n", n->topic.posts[j].username,
+                 n->topic.posts[j].text);
+        }
         n = n->next;
       }
+    }
+  }
+  
 }
 
 // returns -1 if failure, otherwise 0 on success

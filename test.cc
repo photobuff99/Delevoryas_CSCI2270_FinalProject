@@ -33,7 +33,7 @@ int main()
     memcpy(testtopic.title,buffer,20);       // copy username into testtopic.title, it's ok bceause same limit length
     for (int j = 0; j < 10; ++j) {           // 10 posts per topic
       memset(buffer,0,256);                  // clear buffer to use username for actual username field
-      strcpy(buffer,title_username.c_str()); // copy username into buffer for post username field
+      strncpy(buffer,title_username.c_str(),sizeof buffer); // copy username into buffer for post username field
       memcpy(testtopic.posts[j].username,buffer,20);  // copy username from buffer into actual post field
 
       getline(poststrings, post);           // get a post string line
@@ -41,8 +41,8 @@ int main()
       strcpy(buffer,post.c_str());          // copy string into buffer
       memcpy(testtopic.posts[j].text,buffer,140); // copy string from buffer into posts.text field
       // insert finished topic struct into table
-      testtable.insert(testtopic);
     }
+    testtable.insert(testtopic);
   }
   testtable.print();// check if it worked correctly
 }
