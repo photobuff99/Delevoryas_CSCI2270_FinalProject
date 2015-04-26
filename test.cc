@@ -45,5 +45,7 @@ int main()
     testtable.insert(testtopic);
   }
   testtable.print();// check if it worked correctly
+  poststrings.close();
+  usernames.close();
 }
   

@@ -8,7 +8,7 @@ extern "C"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "ChatUtil.h"
+#include "util.h"
 }
 
 struct Node
@@ -35,6 +35,7 @@ class Hash
  ~Hash();
   int djb2(const char *str);
   int insert(const Topic &topic);
+  int insert(const Post &post, std::string topic);
   int remove(const char *title);
   Topic get(const char *title);
   int get(const char*title, Topic *buffer);

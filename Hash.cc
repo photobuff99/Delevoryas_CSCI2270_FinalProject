@@ -219,20 +219,34 @@ void Hash::gettopics(char *buffer)
   //n = table;
   bytes = 0;
   //while (n++ != table+TABLESIZE) {// TESTING
-  memset(buffer, 0, sizeof(char)*MAXTOPICS*TITLELENGTH);
+  memset(buffer, 0, sizeof(char)*MAXTOPICS*TITLELEN);
   for (int i = 0; i < TABLESIZE; ++i) {
     m = table[i];
     while (m != NULL) {
-      if (bytes >= MAXTOPICS*TITLELENGTH) break;
-      strncpy(&buffer[bytes],m->topic.title,TITLELENGTH);
-      //memcpy(&buffer[bytes],teststr,TITLELENGTH);               // TESTING
+      if (bytes >= MAXTOPICS*TITLELEN) break;
+      strncpy(&buffer[bytes],m->topic.title,TITLELEN);
+      //memcpy(&buffer[bytes],teststr,TITLELEN);               // TESTING
       //printf("hash: copying %s to buffer...\n", m->topic.title);// TESTING
       //printf("hash: copying %s to buffer...\n", teststr);       // TESTING
       ++numtopics;
-      bytes += TITLELENGTH;
+      bytes += TITLELEN;
       m = m->next;
     }
   }
 
   printf("Found: %d, ntopics = %d\n", numtopics, ntopics);
+}
+
+int Hash::insert(const Post &post, std::string topic)
+{
+  int index;
+
+  index = djb2(topic.c_str());
+  Node *n = table[index];
+  Post *posts = n->topic.posts;
+  for (int i = 0; i < MAXPOSTS-1; i++) {
+    memcpy(&(posts[i]), &(posts[i+1]), sizeof(struct Post));
+  }
+  memcpy(&(posts[MAXPOSTS-1]), &post, sizeof(struct Post));
+  return 0;
 }
