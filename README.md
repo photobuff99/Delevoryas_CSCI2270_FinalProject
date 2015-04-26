@@ -29,4 +29,5 @@ turning off the server and the table will begin empty again.
 # Contributors
 
 # Open Issues/Bugs
-    I haven't done very much testing with it.
+    I haven't done very much testing with it, but otherwise there aren't any
+    major bugs or issues that I am aware of.
