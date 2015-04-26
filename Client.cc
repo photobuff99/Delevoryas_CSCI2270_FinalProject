@@ -32,6 +32,7 @@ int Socket(const char *ip, const char *port);
 int Connect(const char *ip, const char *port);
 void Shell();
 ssize_t Request(int fd, char type, struct Post *p, struct Topic *t);
+void printlisttopics(char *buffer, size_t size);
 
 int main(int argc, char **argv)
 {
@@ -135,11 +136,12 @@ void Shell()
           bytes = readn(servfd, topicsbuffer, sizeof topicsbuffer);      // TESTING SIZE
           if (bytes < sizeof topicsbuffer)
             cout << "Error! not all bytes read\n";
-          else
+          else {
+            printf("=======Topics=======\n");
             for (int i = 0; i < MAXTOPICS; ++i)
-              printf("%s\n",&topicsbuffer[i*TITLELENGTH]);
-              //cout << i+1 << ": " << buffer[i*TITLELENGTH] << '\n';
-            //cout << buffer << endl;       // TTSTSSD
+              if (topicsbuffer[i*TITLELENGTH] != '\0')
+                printf("%d: %s\n",i,&topicsbuffer[i*TITLELENGTH]);
+          }
         }
       } else {
         cout << "chatclient: currently disconnected from host\n";
@@ -148,16 +150,42 @@ void Shell()
       // print commands
     } else if (line.substr(0,2) == "cd") {
       if (connected) {
+        string requestedtopictitle = line.substr(3); // assuming that only one space cd_s
+        if (requestedtopictitle.length() > 19) {
+          cout << "chatclient: error, topics are 19 characters or less\n";
+          continue; // skip the rest
+        }
         memset(&current_topic, 0, sizeof(current_topic));
+        //strncpy instead of strcpy to prevent overflow
+        strncpy(current_topic.title, requestedtopictitle.c_str(),
+                requestedtopictitle.size());
+        // testing
+        printf("chatclient: requesting topic: %s\n", current_topic.title);
         bytes = Request(servfd, GETTOPIC, NULL, &current_topic);
         if (bytes < sizeof(current_topic)) {
           cout << "chatclient: error, requesting topics, request\n";
         } else {
-          bytes = readn(servfd, &current_topic, sizeof(current_topic));
+          // RECEIVING TOPIC STRUCT
+          bytes = readn(servfd, &current_topic, sizeof current_topic);
           if (bytes < sizeof(current_topic)) {
-            cout << "chatclient: error, receiving topics\n";
+            cout << "chatclient: error receiving topics\n";
           } else {
+            // Check if topic not found 404 error
+            if (strcmp(current_topic.title,"404 ERROR") == 0) {
+              cout << "chatclient: 404 error, topic not found\n";
+              continue;
+            }
             cout << "Title: " << current_topic.title << endl;
+            cout << "Messages:\n";
+            //cout << current_topic.posts[0].username[0] << ": "
+                 //<< current_topic.posts[0].text << '\n';
+            for (int i = 0; i < MAXPOSTS; ++i) {
+              if (current_topic.posts[i].username[0] != '\0') {
+                cout << current_topic.posts[i].username << ": "
+                     << current_topic.posts[i].text << '\n';
+              }
+            }
+
           }
         }
       } else { // not connected
@@ -192,4 +220,15 @@ ssize_t Request(int fd, char type, struct Post *p, struct Topic *t)
   bytes = writen(fd, &request, sizeof(struct Request));
   printf("%lu/%lu bytes written\n", bytes, sizeof(struct Request));
   return bytes;
+}
+
+void printlisttopics(char *buffer, size_t size)
+{
+  int c;
+
+  for (int i = 0; i < size; ++i) {
+    c = buffer[i];
+    if (c >= 32 && c <= 126)
+      printf("%c", c);
+  }
 }

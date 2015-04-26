@@ -35,6 +35,7 @@ using std::string;
 int Socket(const char *ip, const char *port);
 //ssize_t Respond(int fd, struct Request *request);
 ssize_t Respond(int fd, struct Request *request, Hash &table);
+void printlisttopics(char *buffer, size_t size);
 
 
 // Preface every message sent with the number of bytes in character form
@@ -197,11 +198,13 @@ ssize_t Respond(int fd, struct Request *request, Hash &table)
   type = request->type;
   if (type == GETLISTTOPICS) {
     printf("Processing request for list of topics...\n");
-    //char listtopics[20] = " jjjjj uasdf;lkjad\n";
     char listtopics[MAXTOPICS*TITLELENGTH];
+    memset(listtopics, 0, sizeof listtopics);
     table.gettopics(listtopics);
+    //printlisttopics(listtopics, sizeof listtopics);
     for (int i = 0; i < MAXTOPICS; ++i)
-      printf("%s\n", &listtopics[i*TITLELENGTH]);
+      if (listtopics[i*TITLELENGTH] != '\0')
+        printf("%s\n", &listtopics[i*TITLELENGTH]);
     bytes = writen(fd, listtopics, sizeof(listtopics));
     if (bytes < sizeof listtopics)
       printf("server: error writing list of topics, %lu/%lu sent\n",
@@ -216,14 +219,40 @@ ssize_t Respond(int fd, struct Request *request, Hash &table)
 
   } else if (type == GETTOPIC) {
     printf("Processing request for topic...\n");
-    Topic test;
-    memset(&test, 0, sizeof(test));
-    char teststr[20] = "1234512345123451234"; // TODO STOP TESTING
-    memcpy(&(test.title), &teststr, 20);
+    string requestedtopictitle(request->topic.title);
+    // If requested title is too long
+    if (requestedtopictitle.size() > TITLELENGTH) {
+      printf("server: error, topic length too long: %s\n",
+             requestedtopictitle.c_str());
+      return -1;
+    }
+    Topic requestedtopic;
+    memset(&requestedtopic, 0, sizeof requestedtopic);
+    // Try to get the requested topic and store in requestedtopic
+    if (table.get(requestedtopictitle.c_str(), &requestedtopic) == -1) {
+      printf("server: error, topic not found: %s\n",
+             requestedtopictitle.c_str());
+      strncpy(requestedtopic.title, "404 ERROR", sizeof requestedtopic.title);
+      bytes = writen(fd, &requestedtopic, sizeof(requestedtopic));
+      if (bytes < sizeof(requestedtopic))
+        printf("server: error sending error message, aborting\n");
+      return -1;
+    }
+    //memset(&test, 0, sizeof(test)); // clear it, extremely important!!
+    //char teststr[20] = "1234512345123451234";
+    //memcpy(&(test.title), &teststr, 20);
     //memcpy(&(test.username), &teststr, 20);
     //memcpy(&(test.posts[0].username), &teststr, 20);
-    bytes = writen(fd, &test, sizeof(test));
-    printf("done\n");
+    //bytes = writen(fd, &test, sizeof(test));
+    // SEND TOPIC TO USER
+    //table.print();
+    // Print, then write the requested topic
+    //printf("username: %s\npost: %s\n", requestedtopic.posts[0].username,
+           //requestedtopic.posts[0].text);
+    bytes = writen(fd, &requestedtopic, sizeof(requestedtopic));
+    printf("server: %lu/%lu bytes written to client\n",
+            bytes, sizeof(requestedtopic));
+    //printf("done\n");
 
   } else {
     printf("Error, could not process type of request\n");
@@ -231,4 +260,15 @@ ssize_t Respond(int fd, struct Request *request, Hash &table)
   }
 
   return bytes;
+}
+
+void printlisttopics(char *buffer, size_t size)
+{
+  int c;
+
+  for (int i = 0; i < size; ++i) {
+    c = buffer[i];
+    if (c >= 32 && c <= 126)
+      printf("%c", c);
+  }
 }

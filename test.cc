@@ -9,51 +9,41 @@ extern "C"
 #include <stdio.h>
 }
 
-#define teststr "aaaaaaaaaaaaaaaaaaa"
+#define TOPICTEST "Nice day today?"
+#define USERNAMETEST "anonymous"
+#define TEST "Yeah it's pretty nice out today!"
 
 using namespace std;
 
 int main()
 {
-  Hash h;
-  char name[20] = teststr;
-  char text[140];
-  Post p;
-  Topic t;
+  string title_username;
+  string post;
+  struct Topic testtopic;
+  Hash testtable;
+  ifstream poststrings("posts.txt");
+  ifstream usernames("usernames.txt");
+  char buffer[256];
 
-  for (int i = 0; i < 140; ++i)
-    text[i] = 'b';
-
-  strcpy(p.username, name);
-  strcpy(p.text, text);
-  strcpy(t.title, name);
   for (int i = 0; i < 10; ++i) {
-    strcpy(t.posts[i].username, name);
-    strcpy(t.posts[i].text, text);
-  }
-  h.insert(t);
-  h.remove(t.title);
+    memset(&testtopic, 0, sizeof testtopic); // clear topic
+    getline(usernames, title_username);      // get username into title_username
+    memset(buffer, 0, 256); // clear buffer for username
+    strcpy(buffer,title_username.c_str());   // copy username into buffer
+    memcpy(testtopic.title,buffer,20);       // copy username into testtopic.title, it's ok bceause same limit length
+    for (int j = 0; j < 10; ++j) {           // 10 posts per topic
+      memset(buffer,0,256);                  // clear buffer to use username for actual username field
+      strcpy(buffer,title_username.c_str()); // copy username into buffer for post username field
+      memcpy(testtopic.posts[j].username,buffer,20);  // copy username from buffer into actual post field
 
-  FILE *fp = fopen("RandomStrings.txt", "r");
-  char str[11];
-  for (int i = 0; i < 1000; ++i) {
-    fread(t.title, 11, 1, fp);
-    t.title[10] = '\0';
-    h.insert(t);
+      getline(poststrings, post);           // get a post string line
+      memset(buffer, 0, 256);               // clear buffer for use
+      strcpy(buffer,post.c_str());          // copy string into buffer
+      memcpy(testtopic.posts[j].text,buffer,140); // copy string from buffer into posts.text field
+      // insert finished topic struct into table
+      testtable.insert(testtopic);
+    }
   }
-  fclose(fp);
-  fp = fopen("RandomStrings.txt", "r");
-  for (int i = 0; i < 1000; ++i) {
-    if (i == 500)
-    fread(t.title, 11, 1, fp);
-    t.title[10] = '\0';
-  }
-  fclose(fp);
-  //cout << h.HashCollisions() << '\n';
-  //h.print();
-  char buffer[TITLELENGTH*MAXTOPICS];
-  h.gettopics(buffer);
-  printf("num collisions %d\n", h.getcollisions());
-  for (int i = 0; i < MAXTOPICS; ++i)
-    printf("%d: %s\n",i, &buffer[i*TITLELENGTH]);
+  testtable.print();// check if it worked correctly
 }
+  

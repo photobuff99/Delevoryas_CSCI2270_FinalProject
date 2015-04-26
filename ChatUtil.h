@@ -5,17 +5,24 @@
 #define POSTINTOPIC 'P'
 #define GETTOPIC 'G'
 #define GETLISTTOPICS 'A'
+#define MAXPOSTS 10
+#define TITLELENGTH 20
+#define POSTLENGTH 140
+#define USERNAMELENGTH 20
+#define TABLESIZE 3000
+#define MAXTOPICS 1000 
+
 
 struct Post
 {
-  char username[20];
-  char text[140];
+  char username[USERNAMELENGTH];
+  char text[POSTLENGTH];
 };
 
 struct Topic
 {
-  char title[20];
-  struct Post posts[10];
+  char title[TITLELENGTH];
+  struct Post posts[MAXPOSTS];
 };
 
 struct Request

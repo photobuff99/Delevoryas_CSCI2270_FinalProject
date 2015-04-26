@@ -11,10 +11,6 @@ extern "C"
 #include "ChatUtil.h"
 }
 
-#define TABLESIZE 3000
-#define MAXTOPICS 1000 
-#define TITLELENGTH 20
-
 struct Node
 {
   Topic topic;
@@ -40,7 +36,8 @@ class Hash
   int djb2(const char *str);
   int insert(const Topic &topic);
   int remove(const char *title);
-  Topic *get(const char *title);
+  Topic get(const char *title);
+  int get(const char*title, Topic *buffer);
   int getcollisions();
   void print();
   int writetobfile();

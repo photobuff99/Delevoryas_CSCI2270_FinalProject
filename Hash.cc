@@ -24,10 +24,10 @@ Hash::Hash() : collisions(0), ntopics(0)
       perror("fopen");
     while (!feof(bin)) {
       fread(&t, sizeof(struct Topic), 1, bin);
-      printf("hash: reading topic: %s\n", t.title);
+      printf("hash: inserting topic: %s\n", t.title);
       insert(t);
     }
-    printf("hash: total topics found: %d\n", ntopics);
+    printf("hash: total topics in table: %d\n", ntopics);
     fclose(bin);
   }
 }
@@ -131,15 +131,25 @@ int Hash::remove(const char *title)
   }
 }
 
-Topic *Hash::get(const char *title)
+int Hash::get(const char *title, Topic *buffer)
 {
+  Node *n;
   int x;
 
+  memset(buffer, 0, sizeof(struct Topic));
   x = djb2(title);
-  if (table[x] != NULL)
-    return &(table[x]->topic);
-  else
-    return NULL;
+  if (table[x] != NULL) {
+    n = table[x];
+    while (n != NULL && strcmp(n->topic.title, title) != 0) {
+      n = n->next;
+    }
+    if (n == NULL) // if still not found
+      return -1;
+    memcpy(buffer, &(n->topic), sizeof(struct Topic));
+    return 0;
+  } else {
+    return -1;
+  }
 }
 
 int Hash::getcollisions()
@@ -202,6 +212,7 @@ void Hash::gettopics(char *buffer)
   //n = table;
   bytes = 0;
   //while (n++ != table+TABLESIZE) {// TESTING
+  memset(buffer, 0, sizeof(char)*MAXTOPICS*TITLELENGTH);
   for (int i = 0; i < TABLESIZE; ++i) {
     m = table[i];
     while (m != NULL) {
