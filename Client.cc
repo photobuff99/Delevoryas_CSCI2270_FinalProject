@@ -185,7 +185,6 @@ void Shell()
                      << current_topic.posts[i].text << '\n';
               }
             }
-
           }
         }
       } else { // not connected
