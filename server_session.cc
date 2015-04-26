@@ -42,8 +42,7 @@ server_session::server_session(std::string ip_addr_, std::string port_)
   // linked list of possible address
   // combinations to use when attempting
   // to construct a listening socket
-  if (getaddrinfo(ip_addr.c_str(), port.c_str(), &hints, &servinfo) == -1) {
-  //if (getaddrinfo("localhost", "3490", &hints, &servinfo) == -1) {
+  if (getaddrinfo(NULL, port.c_str(), &hints, &servinfo) == -1) {
     cerr << "server: getaddrinfo" << endl;
     valid = false; // indicate failure to create socket_stream
     return;
@@ -81,7 +80,7 @@ server_session::server_session(std::string ip_addr_, std::string port_)
   freeaddrinfo(servinfo);
   // listening_fd is now set to a valid socket, ready to call listen() on
   if (listen(listening_fd, LISTENBACKLOG) == -1) {
-    cerr << "listening on socket:" << endl;
+    cerr << "listening on socket: failed" << endl;
     valid = false;
     return;
   }
