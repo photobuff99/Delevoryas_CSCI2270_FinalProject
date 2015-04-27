@@ -1,7 +1,7 @@
 #ifndef PETER_DELEVORYAS_CLIENT_SESSION_H
 #define PETER_DELEVORYAS_CLIENT_SESSION_H
 #include <iostream>
-#include "util.h"
+#include "myutil.h"
 #define DEFAULT "chatclientdefault"
 
 class client_session

@@ -1,6 +1,10 @@
 #ifndef PETER_DELEVORYAS_UTIL_H
 #define PETER_DELEVORYAS_UTIL_H
 #include <iostream>
+extern "C"
+{
+#include <sys/types.h>
+}
 
 #define DEFAULTUSERNAME "anonymous"
 #define POSTINTOPIC 'P'
