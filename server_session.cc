@@ -1,7 +1,6 @@
 // PETER DELEVORYAS
 #include "server_session.h"
-#include "util.h"
-#include "util.cc"    // necessary for compilation
+#include "myutil.h"
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -25,8 +24,8 @@ using std::cerr;
 using std::endl;
 
 // Server initialization
-server_session::server_session(std::string ip_addr_, std::string port_)
-                              : ip_addr(ip_addr_), port(port_)
+server_session::server_session(const char *port)
+                              : table(NULL), valid(false), listening_fd(-1)
 {
   int yes = 1;
   struct addrinfo hints, *servinfo, *p;
@@ -42,7 +41,7 @@ server_session::server_session(std::string ip_addr_, std::string port_)
   // linked list of possible address
   // combinations to use when attempting
   // to construct a listening socket
-  if (getaddrinfo(NULL, port.c_str(), &hints, &servinfo) == -1) {
+  if (getaddrinfo(NULL, port, &hints, &servinfo) == -1) {
     cerr << "server: getaddrinfo" << endl;
     valid = false; // indicate failure to create socket_stream
     return;
@@ -73,7 +72,7 @@ server_session::server_session(std::string ip_addr_, std::string port_)
   }
   // Couldn't allocate and bind a socket
   if (p == NULL) {
-    cerr << "server: allocating/binding socket" << endl;
+    cerr << "server: error allocating/binding socket" << endl;
     valid = false;
     return;
   }
@@ -92,6 +91,8 @@ server_session::server_session(std::string ip_addr_, std::string port_)
   fd_max = listening_fd;
   // Successfull init of server
   valid = true;
+  if (valid)
+    table = new Hash();
 }
 
 server_session::~server_session()
@@ -100,6 +101,10 @@ server_session::~server_session()
     for (int i = 0; i <= fd_max; ++i)
       if (FD_ISSET(i, &all_fds))
         close(i);
+  }
+  if (table) {
+    delete table;
+    table = NULL;
   }
 }
 
@@ -129,7 +134,7 @@ void server_session::init_chat()
 
 void server_session::accept_connection()
 {
-  std::cout << "DEBUGGING" << endl;
+  //std::cout << "DEBUGGING" << endl;
 
   int new_fd;
   struct sockaddr_storage cliaddr;
@@ -176,7 +181,8 @@ void server_session::handle_connection(int fd)
         //print_table();
         break;
       case 'P':
-        post_message( &(((struct Request *)buffer)->post), ((struct Request *)buffer)->topic.title);
+        post_message( &(((struct Request *)buffer)->post),
+                       ((struct Request *)buffer)->topic.title);
         print_table();
         break;
       case 'N':
@@ -188,10 +194,8 @@ void server_session::handle_connection(int fd)
         break;
       default:
         break;
-        // didn't understand
     }
   }
-
 }
 
 void server_session::post_topic(std::string title)
@@ -199,20 +203,20 @@ void server_session::post_topic(std::string title)
   Topic topic;
   memset(&topic, 0, sizeof topic);
   strncpy(topic.title, title.c_str(), sizeof(topic.title));
-  table.insert(topic);
+  table->insert(topic);
   std::cout << "Inserting: " << title << endl;
 }
 
 void server_session::post_message(struct Post *post, std::string topic)
 {
-  table.insert(*post, topic);
+  table->insert(*post, topic);
 }
 
 void server_session::return_topic(int fd, std::string title)
 {
   Request response;
   memset(&response, 0, sizeof response);
-  table.get(title.c_str(),&(response.topic));
+  table->get(title.c_str(),&(response.topic));
   send_response(fd, &response);
 }
 
@@ -231,7 +235,7 @@ void server_session::return_topics(int fd)
 
   char buffer[MAXTOPICS*TITLELEN];
   memset(buffer, 0, sizeof buffer);
-  table.gettopics(buffer);
+  table->gettopics(buffer);
   bytes = writen(fd, buffer, sizeof buffer);
   if (bytes < sizeof buffer)
     cerr << "server: error writing bytes, list of topics" << endl;

@@ -16,9 +16,9 @@ class client_session
  public:
   client_session();
  ~client_session();
-  void execute(std::string command);
+  void execute(std::string command, std::string user);
   void init_prompt();
-  void connect_to_server(std::string server_addr_, std::string server_port_);
+  void connect_to_server(const char *server_addr_, const char *server_port_);
   void get_topics();
   void get_messages(std::string topic);
   void send_request(struct Request *request);

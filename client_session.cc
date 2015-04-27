@@ -1,7 +1,6 @@
 // Peter Delevoryas
 #include "client_session.h"
-#include "util.h"
-#include "util.cc"      // this is necessary for compilation
+#include "myutil.h"
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -33,23 +32,34 @@ client_session::~client_session()
     close(fd);
 }
 
-void client_session::connect_to_server(std::string server_addr_, std::string server_port_)
+void client_session::connect_to_server(const char *server_addr_, const char *server_port_)
 {
 
   struct addrinfo hints, *servinfo, *p;
+  //char localhost[10] = "127.0.0.1";
   int yes = 1;
 
-  server_addr = server_addr_;
-  server_port = server_port_;
+  server_addr = string(server_addr_);
+  server_port = string(server_port_);
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
-  if (getaddrinfo(server_addr_.c_str(), server_port_.c_str(), &hints, &servinfo) == -1) {
-  //if (getaddrinfo("192.168.1.4", "3490", &hints, &servinfo) == -1) {
-    cerr << "chatclient: getaddrinfo" << endl;
-    valid = false;
-    return;
+  // There's an odd bug with using "localhost" for the address that causes
+  // the server to receive a connection, but the client to report a failure.
+  // Interestingly, simply converting localhost to 127.0.0.1 fixes it.
+  if (strcmp(server_addr_,"localhost") == 0) {
+    if (getaddrinfo("127.0.0.1", server_port_, &hints, &servinfo) == -1) {
+      cerr << "chatclient: getaddrinfo failed" << endl;
+      valid = false;
+      return;
+    }
+  } else {
+    if (getaddrinfo(server_addr_, server_port_, &hints, &servinfo) == -1) {
+      cerr << "chatclient: getaddrinfo failed" << endl;
+      valid = false;
+      return;
+    }
   }
 
   for (p = servinfo; p != NULL; p = p->ai_next) {
@@ -79,27 +89,37 @@ void client_session::init_prompt()
 {
   bool running;
   string command;
+  string username;
+
+  // Ask the user to enter a usename
+  cout << "chatclient: enter your preferred username: " << endl;
+  getline(std::cin,username);
+  // If unspecified, make it anonymous
+  if (username.length() == 0)
+    username = DEFAULTUSERNAME;
+  // If system admin, ask for a password
 
   running = true;
   while (running) {
     cout << "chatclient>";
     getline(std::cin, command);
     if (command != "exit")
-      execute(command);
+      execute(command, username);
     else
       break;
   }
 }
 
-void client_session::execute(std::string command)
+void client_session::execute(std::string command, std::string user)
 {
-  string name, message;
+  string name, message, line;
 
   if (command == "help") {
     cout << "Commands:" << endl;
     cout << "  ls: lists topics/messages" << endl;
     cout << "  cd: changes current topic" << endl;
     cout << "  post: you can post topics or messages" << endl;
+    cout << "  exit: exits the chat application" << endl;
     cout << "  for more detailed help on any of these commands,\n"
          << "  enter help __" << endl;
   } else if (command == "help ls") {
@@ -133,11 +153,14 @@ void client_session::execute(std::string command)
         post_topic(name);
       }
     } else {
-      cout << "chatclient: enter your preferred username: ";
-      getline(std::cin, name);
-      cout << "chatclient: enter your message: ";
-      getline(std::cin, message);
-      post_message(current_topic, name, message);
+      cout << "chatclient: enter a message:" << endl;
+      message = ""; // perhaps unnecessary to clear message since execute will return
+      do {
+        cout << '>';
+        getline(std::cin,line);
+        message += line + '\n';
+      } while (line != "");
+      post_message(current_topic, user, message);
     }
   } else if (command == "exit") {
     connected = false;
@@ -167,7 +190,7 @@ void client_session::get_topics()
 
 void client_session::get_messages(std::string topic)
 {
-  if (topic.length() > 19) {
+  if (topic.size() > TITLELEN) {
     cerr << "chatclient: error, topic is too long" << endl;
     return;
   }
@@ -186,8 +209,9 @@ void client_session::get_messages(std::string topic)
   for (int i = 0; i < MAXPOSTS; ++i) {
     if (request.topic.posts[i].text[0] != '\0') {
       ++numposts;
-      cout << "Usr: " << request.topic.posts[i].username
-           << "--> "  << request.topic.posts[i].text << endl;
+      print_post(&(request.topic.posts[i]));
+      //cout << "Usr: " << request.topic.posts[i].username
+           //<< "--> "  << request.topic.posts[i].text << endl;
     }
   }
   if (numposts == 0)

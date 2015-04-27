@@ -13,9 +13,7 @@ class server_session
   fd_set all_fds;
   fd_set read_fds;
   bool valid;
-  std::string ip_addr;
-  std::string port;
-  Hash table;
+  Hash *table; // Pointer to a hash table
   void handle_connection(int fd);
   void accept_connection();
   
@@ -25,7 +23,7 @@ class server_session
   // ip address and port numbers. If it fails, valid is set to false.
   // Otherwise, valid is set to true, and listening_fd will refer
   // to a listening socket descriptor
-  server_session(std::string ip_addr_, std::string port_);
+  server_session(const char *port);
 
   // closes the file descriptors that are currently allocated
  ~server_session();
@@ -48,7 +46,7 @@ class server_session
   void post_message(struct Post *post, std::string topic);
   void send_response(int fd, struct Request *response);
   inline bool is_valid() { return valid; }
-  inline void print_table() { table.print(); }
+  inline void print_table() { table->print(); }
 
 };
 

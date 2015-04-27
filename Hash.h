@@ -2,13 +2,12 @@
 #define PETERDELEVORYAS_HASH_H
 #include <vector>
 #include <string>
-
+#include "myutil.h"
 extern "C"
 {
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "util.h"
 }
 
 struct Node
@@ -47,7 +46,8 @@ class Hash
   void print();
   int writetobfile();
   int getntopics();
-  void gettopics(char *buffer); // MUST BE MAXTOPICS*TITLELENGTH longs
+  void gettopics(char *buffer); // MUST BE MAXTOPICS*TITLELENGTH longs,
+                                // should be modified to include size of buffer
 };
 
 #endif//PETERDELEVORYAS_HASH_H

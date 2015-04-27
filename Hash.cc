@@ -1,6 +1,7 @@
 #include "Hash.h"
 #include <iostream>
 #include <cmath>
+#include "myutil.h"
 
 extern "C"
 {
@@ -24,10 +25,10 @@ Hash::Hash() : collisions(0), ntopics(0)
       perror("fopen");
     while (!feof(bin)) {
       fread(&t, sizeof(struct Topic), 1, bin);
-      printf("hash: inserting topic: %s\n", t.title);
-      insert(t);
+      if (insert(t))
+        printf("hash: inserted topic: %s\n", t.title);
     }
-    printf("hash: total topics in table: %d\n", ntopics);
+    printf("hash: topics read from file: %d\n", ntopics);
     fclose(bin);
   }
 }
@@ -160,19 +161,25 @@ int Hash::getcollisions()
 void Hash::print()
 {
   Node *n;
+  char buffer[USERLEN+POSTLEN];
 
   for (int i = 0; i < TABLESIZE; ++i) {
     if ((n = table[i]) != NULL) {
       while (n != NULL) {
         printf("%d: %s\n", i, n->topic.title);
         for (int j = 0; j < MAXPOSTS; ++j) {
-          printf("  %s> %s\n", n->topic.posts[j].username,
-                 n->topic.posts[j].text);
+          //post_to_string(&(n->topic.posts[j]), buffer, sizeof buffer);
+          print_post(&(n->topic.posts[j]));
+          //printf("  %s>\n", n->topic.posts[j].username);
+          //for (int k = 0; k < POSTLEN; ++k) {
+            //if (n->topic.post[j].text[k] == '\0')
+          //}
         }
         n = n->next;
       }
     }
   }
+  std::cout << "# topics: " << ntopics << std::endl;
   
 }
 
@@ -211,26 +218,20 @@ int Hash::getntopics()
 
 void Hash::gettopics(char *buffer)
 {
-  Node **n, *m;
+  Node *n;
   int bytes;
-  //char teststr[20] = "0000000000000000001"; // TESTING
   int numtopics = 0;
 
-  //n = table;
   bytes = 0;
-  //while (n++ != table+TABLESIZE) {// TESTING
   memset(buffer, 0, sizeof(char)*MAXTOPICS*TITLELEN);
   for (int i = 0; i < TABLESIZE; ++i) {
-    m = table[i];
-    while (m != NULL) {
+    n = table[i];
+    while (n != NULL) {
       if (bytes >= MAXTOPICS*TITLELEN) break;
-      strncpy(&buffer[bytes],m->topic.title,TITLELEN);
-      //memcpy(&buffer[bytes],teststr,TITLELEN);               // TESTING
-      //printf("hash: copying %s to buffer...\n", m->topic.title);// TESTING
-      //printf("hash: copying %s to buffer...\n", teststr);       // TESTING
+      strncpy(&buffer[bytes],n->topic.title,TITLELEN);
       ++numtopics;
       bytes += TITLELEN;
-      m = m->next;
+      n = n->next;
     }
   }
 
