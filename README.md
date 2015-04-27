@@ -13,15 +13,15 @@ to the board using the client executable you made with make! Since the server
 is running a an executable compiled on the virtual machine, we should have
 the same version of GCC and the same byte respresentation, so the data
 should transfer perfectly!
-    1. So, to connect to the remote server I rented, run the client executable
-       with 
+1. So, to connect to the remote server I rented, run the client executable
+  with 
 
         ./client 108.61.224.250 9000
 
-       (108.61.224.250 is the IP address of the remote server I rented for $5)
-    2. Now try out the server! Type help for help, or help "command goes here"
-       to see how to post a new topic, enter a topic, view messages from a topic,
-       change topic, or see the current topics!
+(108.61.224.250 is the IP address of the remote server I rented for $5)
+2. Now try out the server! Type help for help, or help "command goes here"
+   to see how to post a new topic, enter a topic, view messages from a topic,
+   change topic, or see the current topics!
 You may also be wondering, how can I run the server myself? What a great
 question! If you want to run the server on your own computer, and connect
 using a separate terminal window on your computer or from another computer
