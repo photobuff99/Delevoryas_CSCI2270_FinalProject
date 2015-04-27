@@ -1,7 +1,11 @@
 # How to Run
 PSA: This is for Unix OS's, Windows support not yet available! Sorry!
     1. Download the project files to your favorite directory
-    2. Use makefile to compile files (type "make -B")
+    2. Use makefile to compile files
+
+        cd ~/Downloads
+        make
+
 #### Now what?
 Well, it depends how you want to test it! I rented an Ubunto server that has
 the same operating system (14.04) as our virtual machine, so you can connect
@@ -10,7 +14,10 @@ is running a an executable compiled on the virtual machine, we should have
 the same version of GCC and the same byte respresentation, so the data
 should transfer perfectly!
     1. So, to connect to the remote server I rented, run the client executable
-       with "./client 108.61.224.250 9000"
+       with 
+
+        ./client 108.61.224.250 9000
+
        (108.61.224.250 is the IP address of the remote server I rented for $5)
     2. Now try out the server! Type help for help, or help "command goes here"
        to see how to post a new topic, enter a topic, view messages from a topic,
@@ -19,14 +26,22 @@ You may also be wondering, how can I run the server myself? What a great
 question! If you want to run the server on your own computer, and connect
 using a separate terminal window on your computer or from another computer
 on the same LAN:
-    1. Start by running the server with "./server 9000"
+    1. Start by running the server on a machine
+
+        ./server 9000
+
     2. Run the client and connect to your server, using the ip address of
        the machine the server is running on.
        Ex: If you're running the server on the same machine as the client,
-           enter "./client localhost 9000"
-           If you're running the server on another computer on the same
-           LAN as your client, and the server machine's IP is 192.168.1.3,
-           enter "./client 192.168.1.3 9000" on your client machine.
+           enter:
+
+          ./client localhost 9000
+
+       If you're running the server on another computer on the same
+       LAN as your client, and the server machine's IP is 192.168.1.3,
+       enter: (on the machine you're trying to connect from)
+
+          ./client 192.168.1.3 9000
 
 # Project Summary
 This library provides code for a simple LAN message board server, along with
