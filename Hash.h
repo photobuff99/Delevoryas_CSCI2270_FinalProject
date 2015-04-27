@@ -31,8 +31,12 @@ class Hash
   int ntopics;
   
  public:
+  // Constructs table from table.bin, if binary file not in
+  // current directory, creates empty hash table.
   Hash();
+  // Writes current topics to table.bin, for use later.
  ~Hash();
+  
   int djb2(const char *str);
   int insert(const Topic &topic);
   int insert(const Post &post, std::string topic);

@@ -33,7 +33,12 @@ struct Request
   struct Topic topic;
 };
 
+// Attempts to read n bytes from the given file descriptor,
+// copying them to the buffer given by vptr. Returns
+// the actual number of bytes read, or -1 on failure.
 ssize_t readn(int fd, void *vptr, size_t n);
+// Writes n bytes starting at vptr to the given file descriptor.
+// Returns the number of bytes sucessfully written, or -1 on failure
 ssize_t writen(int fd, const void *vptr, size_t n);
 
 #endif//PETER_DELEVORYAS_UTIL_H
