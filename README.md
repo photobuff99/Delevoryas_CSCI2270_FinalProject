@@ -26,20 +26,20 @@ You may also be wondering, how can I run the server myself? What a great
 question! If you want to run the server on your own computer, and connect
 using a separate terminal window on your computer or from another computer
 on the same LAN:
-    1. Start by running the server on a machine
+1. Start by running the server on a machine
 
         ./server 9000
 
-    2. Run the client and connect to your server, using the ip address of
-       the machine the server is running on.
-       Ex: If you're running the server on the same machine as the client,
-           enter:
+2. Run the client and connect to your server, using the ip address of
+the machine the server is running on.
+Ex: If you're running the server on the same machine as the client,
+enter:
 
           ./client localhost 9000
 
-       If you're running the server on another computer on the same
-       LAN as your client, and the server machine's IP is 192.168.1.3,
-       enter: (on the machine you're trying to connect from)
+If you're running the server on another computer on the same
+LAN as your client, and the server machine's IP is 192.168.1.3,
+enter: (on the machine you're trying to connect from)
 
           ./client 192.168.1.3 9000
 
