@@ -7,9 +7,9 @@ PSA: This is for Unix OS's, Windows support not yet available! Sorry!
         make
 
 #### Now what?
-Well, it depends how you want to test it! I rented an Ubunto server that has
-the same operating system (14.04) as our virtual machine, so you can connect
-to the board using the client executable you made with make! Since the server
+Well, it depends how you want to test it! I rented an Ubuntu server that has
+the same operating system (14.04) as our virtual machine (for only $5! what a deal!!), so you can connect
+to the server I'm running on the remote virtual machine I rented using the client executable you made with make! Since the server
 is running a an executable compiled on the virtual machine, we should have
 the same version of GCC and the same byte respresentation, so the data
 should transfer perfectly!
