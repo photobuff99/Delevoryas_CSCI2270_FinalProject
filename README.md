@@ -79,12 +79,12 @@ as it was.
 * This code was written for Unix systems, including Mac OS X and Ubuntu Linux.
 
 # System Requirements
-    C/C++ compiler is required to compile the source code.
-    Unix systems should be able to run the server and client programs.
-    Windows users will not be able to use this library, Solaris users may have issues as well.
+* C/C++ compiler is required to compile the source code.
+* Unix systems should be able to run the server and client programs.
+* Windows users will not be able to use this library, Solaris users may have issues as well.
 
 # Group Members
-    Peter Delevoryas
+Peter Delevoryas
 
 # Contributors
 
