@@ -9,16 +9,21 @@ extern "C"
 #include <unistd.h>
 }
 
+// See myutil.h for documentation
 ssize_t writen(int fd, const void *vptr, size_t n)
 {
-  size_t nleft;
-  ssize_t nwritten;
-  const char *ptr;
+  size_t nleft;     // difference between n and num bytes written in total
+  ssize_t nwritten; // num bytes written after one write() call
+  const char *ptr;  // points to location in vptr
 
   ptr = (const char *) vptr;
   nleft = n;
   while (nleft > 0) {
     if ( (nwritten = write(fd, ptr, nleft)) <= 0) {
+      // If write() is interrupted (signfied by EINTR) then set nwritten to 0
+      // so that nleft stays the same, but keep trying to write.
+      // If errno != EINTR, then return -1, some other error must have
+      // occurred and it is unlikely to be recovered from.
       if (nwritten < 0 && errno == EINTR)
         nwritten = 0;
       else
@@ -30,16 +35,21 @@ ssize_t writen(int fd, const void *vptr, size_t n)
   return n;
 }
 
+// See myutil.h for documentation
 ssize_t readn(int fd, void *vptr, size_t n)
 {
-  size_t nleft;
-  ssize_t nread;
-  char *ptr;
+  size_t nleft;   // difference between n and num bytes read in total
+  ssize_t nread;  // num bytes read after one read() call
+  char *ptr;      // points to location in vptr
 
   ptr = (char *) vptr;
   nleft = n;
   while (nleft > 0) {
     if ( (nread = read(fd, ptr, nleft)) < 0) {
+      // If read() is interrupted (signfied by EINTR) then set nread to 0
+      // so that nleft stays the same, but keep trying to read.
+      // If errno != EINTR, then return -1, some other error must have
+      // occurred and it is unlikely to be recovered from.
       if (errno == EINTR)
         nread = 0;
       else

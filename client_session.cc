@@ -24,7 +24,7 @@ using std::cerr;
 using std::endl;
 using std::string;
 
-client_session::client_session() : fd(-1), valid(false), connected(false), current_topic(DEFAULT){}
+client_session::client_session() : fd(-1), valid(false), connected(false), current_topic(HOME){}
 
 client_session::~client_session()
 {
@@ -62,6 +62,8 @@ void client_session::connect_to_server(const char *server_addr_, const char *ser
     }
   }
 
+  // Loop through linked list of possible addresses, attempt to connect.
+  // On first successful connection, break from the loop.
   for (p = servinfo; p != NULL; p = p->ai_next) {
     if ( (fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
       cerr << "chatclient: socket invalid, continuing..." << endl;
@@ -74,11 +76,12 @@ void client_session::connect_to_server(const char *server_addr_, const char *ser
     }
     break;
   }
-  if (p == NULL) {
+  if (p == NULL) { // If connect/socket failed in every case, session is invalid
     cerr << "chatclient: error on getting socket, session invalid" << endl;
     valid = false;
     return;
   }
+  // Delete linked list of address results
   freeaddrinfo(servinfo);
   // Success! 
   valid = true;
@@ -134,18 +137,19 @@ void client_session::execute(std::string command, std::string user)
   } else if (command == "help post") {
     cout << "  Enter \"post\" while in a topic directory to post a message\n"
          << "  Enter \"post\" while in the home directory to make a new topic\n";
-  } else if (command == "ls") {
-    if (current_topic == DEFAULT)
+  
+  } else if (command == "ls") { // Either return list of topics or messages
+    if (current_topic == HOME)  // list of topics, if in HOME "directory"
       get_topics();
     else
-      get_messages(current_topic);
-  } else if (command.substr(0,2) == "cd") {
-    if (command.length() > 4)
+      get_messages(current_topic); // if in a topic, get list of messages
+  } else if (command.substr(0,2) == "cd") { // if attempting to change current topic
+    if (command.length() > 4) // if trying to enter a different topic
       current_topic = command.substr(3);
-    else if (command == "cd")
-      current_topic = DEFAULT;
-  } else if (command == "post") {
-    if (current_topic == DEFAULT) {
+    else if (command == "cd") // if trying to return to HOME
+      current_topic = HOME;
+  } else if (command == "post") { // Asking to post either a message or topic
+    if (current_topic == HOME) {  // If in the HOME directory, prompt for post name
       cout << "chatclient: enter the name of the topic you want to create: ";
       getline(std::cin,name);
       if (name.size() > TITLELEN) {
@@ -155,7 +159,7 @@ void client_session::execute(std::string command, std::string user)
       } else {
         post_topic(name);
       }
-    } else {
+    } else { // If not in HOME, ask for user's message
       cout << "chatclient: enter your message followed by a blank line:" << endl;
       message = ""; // perhaps unnecessary to clear message since execute will return
       do {
@@ -189,8 +193,6 @@ void client_session::get_topics()
     if (buffer[i*TITLELEN] != '\0')
       printf("%d: %s\n",i+1, &(buffer[i*TITLELEN]));
   }
-  
-  // parse response
 }
 
 void client_session::get_messages(std::string topic)
@@ -215,8 +217,6 @@ void client_session::get_messages(std::string topic)
     if (request.topic.posts[i].text[0] != '\0') {
       ++numposts;
       print_post(&(request.topic.posts[i]));
-      //cout << "Usr: " << request.topic.posts[i].username
-           //<< "--> "  << request.topic.posts[i].text << endl;
     }
   }
   if (numposts == 0)
