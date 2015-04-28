@@ -44,34 +44,15 @@ enter: (on the machine you're trying to connect from)
           ./client 192.168.1.3 9000
 
 # Project Summary
-This library provides code for a simple LAN message board server, along with
-sample client code for accessing and posting to the message board. The message
-board consists of a number of different topics, each containing a series of
-user-submitted messages. The Client process begins by connecting to the server
-specified by the command line arguments. Once connected, the program will
-prompt the user for command input, either "ls", "cd", or "post" and set
-the current topic to none. If you enter "ls" while the topic = none,
-the server will send back a list of topics, and the client will print them
-out on your terminal. If you type "cd exampletopicname", the topic will
-change to = exampletopicname. If you type "ls" again, the topic name will
-print, and if there are any messages currently in that topic, they will display.
-If the topic is invalid (not in the messageboard), the topic name will not display,
-and the list of messages will not display. If you type "cd" without a topic
-specified, the topic will revert to none. If you type "post" while current
-topic = none, you will be prompted for a topic name: it is required to be
-19 characters long (or less). The topic will then be sent to the server,
-the server will create a new topic entry in the hash table, and you can proceed
-to enter the topic with "cd topicname". While current topic != none, if
-you type "post", you will be prompted to enter a username and a message to post.
-The username must be 19 characters or less, and the message must be 139 characters
-or less. The message will then be sent to the server, and if you type ls, you
-will retrieve the current messages in that topic, including your newly created one.
-The server stores up to 10 messages at a time, then it begins deleting the oldest one
-as new ones are inserted.
-The server is currently running as a daemon process, however if ended, it will
-create a binary file containing the topics it had stored in the hash table. If
-restarted, it will use the same binary file to reconstruct the messageboard
-as it was.
+This library provides code for a simple messageboard server and client. The messageboard is structured as a collection of topics, each containing up to 10 posts at a time. 
+
+The server uses a hash table to store the topics: this way, users can be served in close to O(1) time (because I use an extremely efficient hash function called djb2, and the ratio of the number of items stored to the number of spaces in my table is very small, there are usually 0 collisions. In the case of collisions, however, a linked list is used to chain elements at that index of the table.
+
+After the server program is started, the client can connect using the ip address of the machine running the server and the port which the server is using. From there, clients can post topics, post messages within topics, view the messages in topics, and view a list of the topics that have been created.
+
+When the server process is terminated, the server will write its current state to a binary file. Later, when the server is restarted, if the binary file is in that directory, the server will reconstruct the hash table using the binary file.
+
+The primary features of this library are in the hash table, including basic insertion and deletion operations, as well as the more complex binary file operations. They are documented in the FunctionDocumentation.md file. The rest of the functions I use (including the various socket wrappers and server/client functions) are documented in their header and implementation files.
 
 # Dependencies
 * This program uses the standard C and C++ libraries, and it is necessary to have access to GCC for compilation.
@@ -97,11 +78,3 @@ Peter Delevoryas
 
 # More Information About the Transmission Process
 This simple Server/Client library implements communication between processes, even on different computers, however there is one catch! My program uses the fact that we can transfer bytes across the socket using the read() and write() functions, however unfortunately this will only work on the same computer or very similar computers, as byte representations and compilers will result in different program interpretations, and the data will not be transferred in a standard way. I plan to serialize the data in this program as soon as I can, but since the VM's are all the same, it doesn't really matter, as they all have the same representations of the program. However, it will be impossible to connect with other users using the VM, because the VM uses a NAT to shield itself from the outside world, and without more sophisticated programming methods, there is no way for me to facilitate communication between different VMs. So take my word for it, this program does work across multiple computers! I've tried it with two macs running OS X natively, and the connection was made and the data transferred was correct. Unfortunately, you will likely only be able to simulate this using multiple terminal windows on your single computer.
-
-# Using the program across different computers
-* If two computers are very similar, this program will work. Otherwise, it will
-have trouble transmitting data, but should still be able to connect.
-* To test it out, run the server on a port like 9000 on one computer,
-for example "./server 9000".
-* Then on another computer, run "./client local_ip_address_of_other_computer 9000"
-and the two processes, if successful, will connect, and then you can use the message board!
