@@ -99,6 +99,9 @@ void client_session::init_prompt()
     username = DEFAULTUSERNAME;
   // If system admin, ask for a password
 
+  // Let the user know about help
+  cout << "chatclient: enter \"help\" to see a list of commands" << endl;
+
   running = true;
   while (running) {
     cout << "chatclient>";
@@ -116,21 +119,21 @@ void client_session::execute(std::string command, std::string user)
 
   if (command == "help") {
     cout << "Commands:" << endl;
+    cout << "  cd: changes current topic/directory" << endl;
     cout << "  ls: lists topics/messages" << endl;
-    cout << "  cd: changes current topic" << endl;
     cout << "  post: you can post topics or messages" << endl;
     cout << "  exit: exits the chat application" << endl;
     cout << "  for more detailed help on any of these commands,\n"
-         << "  enter help __" << endl;
+         << "  enter help [commandname]" << endl;
   } else if (command == "help ls") {
-    cout << "  Enter ls while in a topic to view the last ten messages\n"
-         << "  Enter ls while outside of any topics to view the list of topics\n";
+    cout << "  Enter ls while in a topic directory to view the last ten messages\n"
+         << "  Enter ls while in the home directory to view the list of topics\n";
   } else if (command == "help cd") {
-    cout << "  Enter only \"cd\" to leave any topic you are in.\n"
-         << "  Enter cd _____ to \"changes directories\" to a topic.\n";
+    cout << "  Enter \"cd\" to return to the home directory\n"
+         << "  Enter \"cd _____\" to enter a topic directory\n";
   } else if (command == "help post") {
-    cout << "  Enter \"post\" while in a topic to post a message.\n"
-         << "  enter \"post\" while outside any topics to make a new topic.\n";
+    cout << "  Enter \"post\" while in a topic directory to post a message\n"
+         << "  Enter \"post\" while in the home directory to make a new topic\n";
   } else if (command == "ls") {
     if (current_topic == DEFAULT)
       get_topics();
@@ -143,7 +146,7 @@ void client_session::execute(std::string command, std::string user)
       current_topic = DEFAULT;
   } else if (command == "post") {
     if (current_topic == DEFAULT) {
-      cout << "chatclient: enter the name of the topic you want to submit: ";
+      cout << "chatclient: enter the name of the topic you want to create: ";
       getline(std::cin,name);
       if (name.size() > TITLELEN) {
         cout << "chatclient: error, topic length to large: "
@@ -153,7 +156,7 @@ void client_session::execute(std::string command, std::string user)
         post_topic(name);
       }
     } else {
-      cout << "chatclient: enter a message:" << endl;
+      cout << "chatclient: enter your message followed by a blank line:" << endl;
       message = ""; // perhaps unnecessary to clear message since execute will return
       do {
         cout << '>';
@@ -164,6 +167,8 @@ void client_session::execute(std::string command, std::string user)
     }
   } else if (command == "exit") {
     connected = false;
+  } else if (command == "") {
+    return;
   } else {
     cout << "chatclient: error, command not found" << endl;
   }

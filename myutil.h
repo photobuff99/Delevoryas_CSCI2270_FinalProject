@@ -17,7 +17,7 @@ extern "C"
 //#define MAXTOPICS 1000
 #define TITLELEN 101
 #define USERLEN 101
-#define POSTLEN 1001
+#define POSTLEN 2001
 #define MAXTOPICS 100
 #define MAXPOSTS 10 
 #define TABLESIZE 3000
