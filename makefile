@@ -1,4 +1,4 @@
-all: server client
+all: server client clean
 
 client: client_driver.o client_session.o myutil.o
 	g++ client_driver.o client_session.o myutil.o -o client
@@ -28,5 +28,4 @@ myutil.o:
 	g++ -c myutil.cc
 
 clean :
-	rm client_session.o util.o Hash.o server_driver.o server_session.o \
-	   client_driver.o
+	rm client_session.o myutil.o Hash.o server_driver.o server_session.o client_driver.o

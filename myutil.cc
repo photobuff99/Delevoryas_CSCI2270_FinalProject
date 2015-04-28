@@ -61,7 +61,7 @@ std::string post_to_string(Post *post)
   char c;
 
   bytes_read = 0;
-  post_str += std::string(post->username);
+  post_str += std::string(post->username) + '\n';
   while (bytes_read < POSTLEN) {
     c = post->text[bytes_read];
     if (c != '\0') {
