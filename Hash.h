@@ -58,7 +58,7 @@ class Hash
   // Copies the specified topic, identified by title, into the buffer.
   // Returns -1 on failure, 0 on success. If topic not in table,
   // returns -1.
-  int get(const char*title, Topic *buffer);
+  int get(const char *title, Topic *buffer);
 
   // Returns collisions variable
   int getcollisions();
@@ -71,6 +71,7 @@ class Hash
 
   // Writes each topic struct to a binary file, in order of smallest to largest index
   // in table. Deletes old bfile, if present in current directory.
+  // Returns -1 on failue to write table, 0 on success
   int writetobfile();
 
   // Returns ntopics variable.
