@@ -1,47 +1,29 @@
-# How to Run
+# Messageboard App
+## How to Run
 PSA: This is for Unix OS's, Windows support not yet available! Sorry!
-    1. Download the project files to your favorite directory
-    2. Use makefile to compile files
 
-        cd ~/Downloads
+1. Download the project files to your favorite directory (for example, ~/Downloads)
+2. Use the makefile to compile files
+3. Run client program, connecting to the remote server I setup on port 9000
+
+If you're new to using the command line, here's some more specific instructions:
+1. Download or clone this git repository to your Downloads folder (if you download it, make sure to decompress the zip file)
+
+2. Open a terminal application
+
+3. Enter this command to change directories to the project folder:
+
+        cd ~/Downloads/Delevoryas_CSCI2270_FinalProject
+
+4. Then enter this command into the terminal to use the makefile I provided:
+
         make
 
-#### Now what?
-Well, it depends how you want to test it! I rented an Ubuntu server that has
-the same operating system (14.04) as our virtual machine (for only $5! what a deal!!), so you can connect
-to the server I'm running on the remote virtual machine I rented using the client executable you made with make! Since the server
-is running a an executable compiled on the virtual machine, we should have
-the same version of GCC, so the data
-should transfer correctly!
-1. So, to connect to the remote server I rented, run the client executable
-  with 
+5. To run the client program (i.e., the program that accesses the messageboard) enter this command:
 
         ./client 108.61.224.250 9000
-
-(108.61.224.250 is the IP address of the remote server I rented for $5)
-2. Now try out the server! Type help for help, or help "command goes here"
-   to see how to post a new topic, enter a topic, view messages from a topic,
-   change topic, or see the current topics!
-You may also be wondering, how can I run the server myself? What a great
-question! If you want to run the server on your own computer, and connect
-using a separate terminal window on your computer or from another computer
-on the same LAN:
-1. Start by running the server on a machine
-
-        ./server 9000
-
-2. Run the client and connect to your server, using the ip address of
-the machine the server is running on.
-Ex: If you're running the server on the same machine as the client,
-enter:
-
-          ./client localhost 9000
-
-If you're running the server on another computer on the same
-LAN as your client, and the server machine's IP is 192.168.1.3,
-enter: (on the machine you're trying to connect from)
-
-          ./client 192.168.1.3 9000
+    
+6. If the server is running (I leave it running all the time, occassionally rebooting it at night), you should connect successfully. If you don't for whatever reason, try running it again a few times, just in case it's a random network routing issue/etc. Once you connect successfully, the program will ask you for your username, and after that, you can enter "help" to see a list of commands you can use to browse and post on the messageboard.
 
 # Project Summary
 This library provides code for a simple messageboard server and client. The messageboard is structured as a collection of topics, each containing up to 10 posts at a time. 
@@ -56,7 +38,7 @@ The primary features of this library are in the hash table, including basic inse
 
 # Dependencies
 * This program uses the standard C and C++ libraries, and it is necessary to have access to GCC for compilation.
-* Serialization of transmitted bytes has not been implemented, so it is important that systems using the program are using GCC 4.8.2 (struct padding). However, I have tried connecting from my Mac (running OS X Yosemite 10.10.2 and not using gcc but rather Apple's LLVM version 6.1.0 and clang-602.0.49) and it works just as well as when I connected using the virtual machine.
+* Serialization of transmitted bytes has not been implemented, so it is important that systems using the program are using GCC 4.8.2 (for struct padding). However, I have tried connecting from my Mac (running OS X Yosemite 10.10.2 and not using gcc but rather Apple's LLVM version 6.1.0 and clang-602.0.49) and it works just as well as when I connected using the virtual machine.
 * This code was written for Unix systems, including Mac OS X and Ubuntu Linux.
 
 # System Requirements
