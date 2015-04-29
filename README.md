@@ -29,9 +29,9 @@ If you're new to using the command line, here's some more specific instructions:
 # Project Summary
 This library provides code for a simple messageboard server and client. The messageboard is structured as a collection of topics, each containing up to 10 posts at a time. 
 
-The server uses a hash table to store the topics: this way, users can be served in close to O(1) time (because I use an extremely efficient hash function called djb2, and the ratio of the number of items stored to the number of spaces in my table is very small, there are usually 0 collisions. In the case of collisions, however, a linked list is used to chain elements at that index of the table.
+The server uses a hash table to store the topics: this way, users can be served in close to O(1) time (because I use an extremely efficient hash function called djb2, and the ratio of the number of items stored to the number of spaces in my table is very small, there are usually 0 collisions). In the case of collisions, however, a linked list is used to chain elements at that index of the table.
 
-After the server program is started, the client can connect using the ip address of the machine running the server and the port which the server is using. From there, clients can post topics, post messages within topics, view the messages in topics, and view a list of the topics that have been created.
+After the server program is started, the client can connect using the IP address of the machine running the server and the port which the server is using. From there, clients can post topics, post messages within topics, view the messages in topics, and view a list of the topics that have been created.
 
 When the server process is terminated, the server will write its current state to a binary file. Later, when the server is restarted, if the binary file is in that directory, the server will reconstruct the hash table using the binary file.
 
@@ -40,12 +40,12 @@ The primary features of this library are in the hash table, including basic inse
 # Dependencies
 * This program uses the standard C and C++ libraries, and it is necessary to have access to GCC for compilation.
 * Serialization of transmitted bytes has not been implemented, so it is important that systems using the program are using GCC 4.8.2 (for struct padding). However, I have tried connecting from my Mac (running OS X Yosemite 10.10.2 and not using gcc but rather Apple's LLVM version 6.1.0 and clang-602.0.49) and it works just as well as when I connected using the virtual machine.
-* This code was written for Unix systems, including Mac OS X and Ubuntu Linux.
+* This code was written for Unix systems, and tested on Mac OS X and Ubuntu Linux.
 
 # System Requirements
 * C/C++ compiler is required to compile the source code.
 * Unix systems should be able to run the server and client programs.
-* Windows users will not be able to use this library, Solaris users may have issues as well.
+* Windows users will not be able to use this library unless they change the system calls, Solaris users may have issues as well.
 
 # Group Members
 Peter Delevoryas
@@ -55,8 +55,10 @@ Peter Delevoryas
 # Open Issues/Bugs
 * Issue: very little error checking between processes
 * Issue: if two servers are running on the same port, client does not indicate there is an issue
+* Issue: Windows support
+* If You have a bug to submit, add it to this portion of the README, and submit a pull request!
 
 # More Information About the Transmission Process
-This program does not using serialization because the data I'm transmitting is in the form of character arrays: even though I'm using structs, since all the fields are character arrays, it works out fine. This is of course because the read() and write() functions automatically take the the information being transmitted and convert it to network byte order, then convert it back to the native byte order on the other side. Using a different compiler might affect the struct padding and thus the sender might send a number of bytes that is smaller/larger than the expected size, and the receiver would be expecting a number of bytes that is larger/smaller than what it would receive, thus producing an error message. I have only tested with Apple's LLVM version 6.1.0, and GCC 4.8.2, but they both have the same size of struct for Title and Post and Request, so they should work together. I have not examined the size of the structs on Windows. To see if the program will work on your machine, simply 
+This program does not use serialization because the data I'm transmitting is in the form of character arrays: even though I'm using structs, since all the fields are character arrays, it works out fine. This is of course because the read() and write() functions automatically take the the information being transmitted and convert it to network byte order, then convert it back to the native byte order on the other side. Using a different compiler might affect the struct padding and thus the sender might send a number of bytes that is smaller/larger than the expected size, and the receiver would be expecting a number of bytes that is larger/smaller than what it would receive. This would produce an error message and prevent certain functions from operating correctly. I have only tested with Apple's LLVM version 6.1.0, and GCC 4.8.2, but they both produce the same size  struct for Title and Post, so systems compiling with either should work together. I have not examined the size of the structs on Windows. To see if the program will work on your machine, write a small test program including "myutil.h", and link "myutil.cc" in the compilation of the test program. Here's what the test program should do:
             cout << sizeof(Post) << ' ' << sizeof(Test) << endl;
 The result you should get, for compatability, is "2102 21121"
