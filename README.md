@@ -72,8 +72,6 @@ Peter Delevoryas
 # Open Issues/Bugs
 * Issue: very little error checking between processes
 * Issue: if two servers are running on the same port, client does not indicate there is an issue
-* Bug: If a user overflows the message posting buffer, it appears to reprint the username in the next post.
-* Issue: Killing the nohup process seems to be preventing the hash table destructor (which writes the binary file) from being called, despite the use of a signal handler which explicitly calls the destructor before exiting.
 
 # More Information About the Transmission Process
 This program does not using serialization because the data I'm transmitting is in the form of character arrays: even though I'm using structs, since all the fields are character arrays, it works out fine. This is of course because the read() and write() functions automatically take the the information being transmitted and convert it to network byte order, then convert it back to the native byte order on the other side. Using a different compiler might affect the struct padding and thus the sender might send a number of bytes that is smaller/larger than the expected size, and the receiver would be expecting a number of bytes that is larger/smaller than what it would receive, thus producing an error message. I have only tested with Apple's LLVM version 6.1.0, and GCC 4.8.2, but they both have the same size of struct for Title and Post and Request, so they should work together. I have not examined the size of the structs on Windows. To see if the program will work on your machine, simply 
