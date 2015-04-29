@@ -269,7 +269,7 @@ void client_session::send_user_info(std::string username)
   char user_info_packet[sizeof(Request)];
 
   memset(user_info_packet, 0, sizeof user_info_packet);
-  user_info_packet[0] = USERINFO // Indicate request type in first byte
+  user_info_packet[0] = USERINFO; // Indicate request type in first byte
   strcpy(user_info_packet+1, username.c_str());
   writen(fd, user_info_packet, sizeof(Request)); // write to socket
 }

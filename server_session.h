@@ -99,7 +99,7 @@ class server_session
   // Retrieves username from buffer (presumed to be USERLEN bytes in size)
   // Writes that client's username and ip address and current time
   // to file "user_records.txt"
-  record_user(int fd, char *username);
+  void record_user(int fd, char *username);
 };
 
 #endif//PETER_DELEVORYAS_SERVER_SESSION_H

@@ -1,6 +1,8 @@
 // PETER DELEVORYAS
 #include "server_session.h"
 #include "myutil.h"
+#include <fstream>
+#include <time.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -293,7 +295,44 @@ void server_session::return_topics(int fd)
     cerr << "server: error writing bytes, list of topics" << endl;
 }
 
+// Helper function for record_user, taken from http://beej.us/guide/bgnet/output/html/multipage/clientserver.html#simpleclient. All credit goes to beej!
+// Makes it easy to get the client's ip address, since it could be either IPv4 or IPv6
+void *get_in_addr(struct sockaddr *sa)
+{
+  if (sa->sa_family == AF_INET) {
+    return &(((struct sockaddr_in*)sa)->sin_addr);
+  }
+  return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
 void server_session::record_user(int fd, char *username)
 {
-  std::string username_str(username);
+  char inet_address[INET6_ADDRSTRLEN]; // Big enough to hold IPv4 or IPv6
+  struct sockaddr_storage client_address;
+  socklen_t cliaddrlen;
+  time_t rawtime;
+  struct tm *timeinfo;
+
+  memset(inet_address, 0, sizeof inet_address);
+  memset(&client_address, 0, sizeof client_address);
+  cliaddrlen = sizeof client_address;
+
+  if (getpeername(fd,(struct sockaddr *)&client_address, &cliaddrlen) == -1) {
+    std::cerr << "Error getting client's ip address" << std::endl;
+    return;
+  } else {
+    inet_ntop(client_address.ss_family,
+              get_in_addr((struct sockaddr *)&client_address),
+              inet_address,
+              sizeof inet_address);
+
+    time(&rawtime); // gets seconds since epoch
+    timeinfo = localtime(&rawtime); // fills timeinfo struct
+
+    // write user connection to file
+    std::ofstream user_records("user_records.txt", std::ios::app | std::ios::out);
+    user_records << "\"" << username << "\" from " << inet_address
+                 << " connected at: " << asctime(timeinfo) << endl;
+    user_records.close();
+  }
 }
