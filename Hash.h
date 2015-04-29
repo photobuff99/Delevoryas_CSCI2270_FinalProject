@@ -21,8 +21,24 @@ struct Node
   Node(const Topic &t) : topic(t), next(NULL), prev(NULL){}
 };
 
-// For the Hash Table:
-// Key = topic.title, value = topic
+/*
+Class description:
+Implementation of a simple Hash Table, the data being stored is the Topic struct
+See "myutil.h" for declaration of Topic struct
+Key used in hash indexing is the title field in the Topic being inserted. The value associated
+with each key is its Topic struct.
+
+Example:
+Hash *table;
+table = new Hash();
+...use hash table...
+delete table; // at the end of your program
+
+Pre-conditions: None
+Post-conditions: Call the destructor if dynamically allocated
+                 Destructor will record topics in table to a binary file "table.bin"
+
+*/
 class Hash
 {
  private:
