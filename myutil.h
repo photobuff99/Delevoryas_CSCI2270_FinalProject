@@ -14,6 +14,7 @@ extern "C"
 #define POSTTOPIC 'N'
 #define GETTOPIC 'T'
 #define GETLISTTOPICS 'L'
+#define USERINFO 'U'
 
 // Lengths of various fields in structs. These must be static in order
 // to ensure static struct size, in order to ensure easy transmission

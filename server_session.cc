@@ -210,6 +210,9 @@ void server_session::handle_connection(int fd)
     // Request.type is a single character, so we can treat it as such
     printf("type of request: %c\n", buffer[0]);
     switch (buffer[0]) { // Based on type of request, respond appropriately
+      case 'U': // Client is sending username
+        record_user(fd, buffer+1);
+        break;
       case 'T': // Client is requesting a topic and its posts
         return_topic(fd, ((struct Request *)buffer)->topic.title); // cast the buffer as a Request struct, access field
         break;
@@ -288,4 +291,9 @@ void server_session::return_topics(int fd)
   bytes = writen(fd, buffer, sizeof buffer);
   if (bytes < sizeof buffer)
     cerr << "server: error writing bytes, list of topics" << endl;
+}
+
+void server_session::record_user(int fd, char *username)
+{
+  std::string username_str(username);
 }

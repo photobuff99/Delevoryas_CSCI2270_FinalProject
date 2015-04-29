@@ -96,6 +96,10 @@ class server_session
   // corresponding posts, if there are any present.
   inline void print_table() { table->print(); }
 
+  // Retrieves username from buffer (presumed to be USERLEN bytes in size)
+  // Writes that client's username and ip address and current time
+  // to file "user_records.txt"
+  record_user(int fd, char *username);
 };
 
 #endif//PETER_DELEVORYAS_SERVER_SESSION_H

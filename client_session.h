@@ -71,6 +71,9 @@ class client_session
   // Returns status of session, i.e. if connection was successful or has
   // not been attempted.
   inline bool is_valid() { return valid; }
+
+  // Sends username to server
+  void send_user_info(std::string username);
 };
 
 #endif//PETER_DELEVORYAS_CLIENT_SESSION_H

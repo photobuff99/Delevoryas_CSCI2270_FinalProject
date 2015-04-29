@@ -102,6 +102,9 @@ void client_session::init_prompt()
     username = DEFAULTUSERNAME;
   // If system admin, ask for a password
 
+  // Send user info to server
+  send_user_info(username);
+
   // Let the user know about help
   cout << "chatclient: enter \"help\" to see a list of commands" << endl;
 
@@ -259,4 +262,14 @@ void client_session::get_response(struct Request *buffer)
     return;
   }
   readn(fd, buffer, sizeof(struct Request));
+}
+
+void client_session::send_user_info(std::string username)
+{
+  char user_info_packet[sizeof(Request)];
+
+  memset(user_info_packet, 0, sizeof user_info_packet);
+  user_info_packet[0] = USERINFO // Indicate request type in first byte
+  strcpy(user_info_packet+1, username.c_str());
+  writen(fd, user_info_packet, sizeof(Request)); // write to socket
 }
