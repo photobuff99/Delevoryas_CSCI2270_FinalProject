@@ -20,7 +20,9 @@ int main(int argc, char **argv)
     exit(1);
   }
 
-  signal(SIGINT, ExitHandler); // Specify signal handler
+  static struct sigaction _sigact;
+  signal(SIGINT, ExitHandler); // SIGINT = CTRL-C
+  signal(SIGTERM, ExitHandler); // SIGTERM = kill pid
   std::cout << "Server session being created..." << std::endl;
   ssn = new server_session(argv[1]); // Make a new server session with specified port from command line arg
   if (ssn->is_valid()) { // if valid, initiate the client handling process
