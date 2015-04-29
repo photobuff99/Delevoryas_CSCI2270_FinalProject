@@ -20,6 +20,7 @@ Hash::Hash() : collisions(0), ntopics(0)
   memset(table, 0, sizeof table);
   // If table.bin in pwd, use it, else, forget about it
   if (stat("table.bin",&buffer) == 0) {
+    printf("hash: found table.bin: attempting to reconstruct table\n");
     bin = fopen("table.bin","rb");
     if (!bin)
       perror("fopen");
