@@ -7,6 +7,7 @@ PSA: This is for Unix OS's, Windows support not yet available! Sorry!
 3. Run client program, connecting to the remote server I setup on port 9000
 
 If you're new to using the command line, here's some more specific instructions:
+
 1. Download or clone this git repository to your Downloads folder (if you download it, make sure to decompress the zip file)
 
 2. Open a terminal application
