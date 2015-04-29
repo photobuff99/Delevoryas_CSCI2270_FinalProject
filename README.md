@@ -11,8 +11,8 @@ Well, it depends how you want to test it! I rented an Ubuntu server that has
 the same operating system (14.04) as our virtual machine (for only $5! what a deal!!), so you can connect
 to the server I'm running on the remote virtual machine I rented using the client executable you made with make! Since the server
 is running a an executable compiled on the virtual machine, we should have
-the same version of GCC and the same byte respresentation, so the data
-should transfer perfectly!
+the same version of GCC, so the data
+should transfer correctly!
 1. So, to connect to the remote server I rented, run the client executable
   with 
 
@@ -56,7 +56,7 @@ The primary features of this library are in the hash table, including basic inse
 
 # Dependencies
 * This program uses the standard C and C++ libraries, and it is necessary to have access to GCC for compilation.
-* Serialization of transmitted bytes has not been implemented, so it is important that systems using the program are running Ubuntu 14.04 and using GCC 4.8.2. However, I have tried connecting from my Mac (running OS X Yosemite 10.10.2 and not using gcc but rather Apple's LLVM version 6.1.0 and clang-602.0.49) and it works just as well as when I connected using the virtual machine.
+* Serialization of transmitted bytes has not been implemented, so it is important that systems using the program are using GCC 4.8.2 (struct padding). However, I have tried connecting from my Mac (running OS X Yosemite 10.10.2 and not using gcc but rather Apple's LLVM version 6.1.0 and clang-602.0.49) and it works just as well as when I connected using the virtual machine.
 * This code was written for Unix systems, including Mac OS X and Ubuntu Linux.
 
 # System Requirements
@@ -73,8 +73,9 @@ Peter Delevoryas
 * Issue: very little error checking between processes
 * Issue: if two servers are running on the same port, client does not indicate there is an issue
 * Bug: If a user overflows the message posting buffer, it appears to reprint the username in the next post.
-* Issue: Serialization: I'm doing any! I'm sending structs over the socket as byte arrays, so the entire project
-    requires that connected machines have the same representation of bytes and the same compiler (cause struct padding)
+* Issue: Killing the nohup process seems to be preventing the hash table destructor (which writes the binary file) from being called, despite the use of a signal handler which explicitly calls the destructor before exiting.
 
 # More Information About the Transmission Process
-This simple Server/Client library implements communication between processes, even on different computers, however there is one catch! My program uses the fact that we can transfer bytes across the socket using the read() and write() functions, however unfortunately this will only work on the same computer or very similar computers, as byte representations and compilers will result in different program interpretations, and the data will not be transferred in a standard way. I plan to serialize the data in this program as soon as I can, but since the VM's are all the same, it doesn't really matter, as they all have the same representations of the program. However, it will be impossible to connect with other users using the VM, because the VM uses a NAT to shield itself from the outside world, and without more sophisticated programming methods, there is no way for me to facilitate communication between different VMs. So take my word for it, this program does work across multiple computers! I've tried it with two macs running OS X natively, and the connection was made and the data transferred was correct. Unfortunately, you will likely only be able to simulate this using multiple terminal windows on your single computer.
+This program does not using serialization because the data I'm transmitting is in the form of character arrays: even though I'm using structs, since all the fields are character arrays, it works out fine. This is of course because the read() and write() functions automatically take the the information being transmitted and convert it to network byte order, then convert it back to the native byte order on the other side. Using a different compiler might affect the struct padding and thus the sender might send a number of bytes that is smaller/larger than the expected size, and the receiver would be expecting a number of bytes that is larger/smaller than what it would receive, thus producing an error message. I have only tested with Apple's LLVM version 6.1.0, and GCC 4.8.2, but they both have the same size of struct for Title and Post and Request, so they should work together. I have not examined the size of the structs on Windows. To see if the program will work on your machine, simply 
+            cout << sizeof(Post) << ' ' << sizeof(Test) << endl;
+The result you should get, for compatability, is "2102 21121"
