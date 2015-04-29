@@ -156,7 +156,7 @@ void client_session::execute(std::string command, std::string user)
       cout << "chatclient: enter the name of the topic you want to create: ";
       getline(std::cin,name);
       if (name.size() > TITLELEN) {
-        cout << "chatclient: error, topic length to large: "
+        cout << "chatclient: error, topic length too large: "
              << name.length() << '/' << TITLELEN-1 << endl;
         return;
       } else {
