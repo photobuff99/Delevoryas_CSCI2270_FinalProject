@@ -53,10 +53,7 @@ Peter Delevoryas
 # Contributors
 
 # Open Issues/Bugs
-* Issue: very little error checking between processes
-* Issue: if two servers are running on the same port, client does not indicate there is an issue
-* Issue: Windows support
-* If You have a bug to submit, add it to this portion of the README, and submit a pull request!
+* See the Issues list for this Repository!
 
 # More Information About the Transmission Process
 This program does not use serialization because the data I'm transmitting is in the form of character arrays: even though I'm using structs, since all the fields are character arrays, it works out fine. This is of course because the read() and write() functions automatically take the the information being transmitted and convert it to network byte order, then convert it back to the native byte order on the other side. Using a different compiler might affect the struct padding and thus the sender might send a number of bytes that is smaller/larger than the expected size, and the receiver would be expecting a number of bytes that is larger/smaller than what it would receive. This would produce an error message and prevent certain functions from operating correctly. I have only tested with Apple's LLVM version 6.1.0, and GCC 4.8.2, but they both produce the same size  struct for Title and Post, so systems compiling with either should work together. I have not examined the size of the structs on Windows. To see if the program will work on your machine, write a small test program including "myutil.h", and link "myutil.cc" in the compilation of the test program. Here's what the test program should do:
