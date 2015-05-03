@@ -71,7 +71,7 @@ std::string post_to_string(Post *post)
   char c;
 
   bytes_read = 0;
-  post_str += std::string(post->username) + '\n';
+  post_str += "\033[1;31m" + std::string(post->username) + "\033[0m\n"; // User names are now red and bold to set them off from the rest of the text
   while (bytes_read < POSTLEN) {
     c = post->text[bytes_read];
     if (c != '\0') {
